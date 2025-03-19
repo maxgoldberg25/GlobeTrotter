@@ -2,6 +2,10 @@
 
 A social platform for travelers to share their journey with the world. Upload photos, geotag them on an interactive map, and connect with fellow travelers.
 
+## Live Demo
+
+Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.app/)
+
 ## Features
 
 - User authentication (registration/login)
@@ -29,20 +33,27 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## MVP Development Plan
+## Deployment
 
-1. Set up project structure ✅
-2. User authentication
-3. Profile management
-4. Photo upload & geolocation
-5. Interactive map integration
-6. Social connectivity
-7. Notifications
-8. Mobile optimization
+This project is deployed on Vercel. Any changes pushed to the main branch will automatically be deployed.
+
+## MVP Development Progress
+
+1. ✅ Set up project structure 
+2. ✅ User authentication UI
+3. ✅ Profile management UI
+4. ✅ Interactive Map Integration with Leaflet
+5. ✅ Photo upload & geolocation UI
+6. ⬜ Backend implementation
+7. ⬜ Social connectivity
+8. ⬜ Notifications
+9. ⬜ Mobile optimization
 
 ## Technologies Used
 
-- Next.js
+- Next.js (version 13.4.19)
 - TypeScript
 - Tailwind CSS
 - React
+- Leaflet (for interactive maps)
+- Vercel (hosting platform)
