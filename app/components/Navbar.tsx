@@ -61,6 +61,12 @@ export default function Navbar() {
                 <Link href="/dashboard" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                   Dashboard
                 </Link>
+                <Link href="/map" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  Explore Map
+                </Link>
+                <Link href="/upload" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  Upload Photos
+                </Link>
                 <Link href="/profile" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                   Profile
                 </Link>
@@ -100,6 +106,12 @@ export default function Navbar() {
               <>
                 <Link href="/dashboard" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
                   Dashboard
+                </Link>
+                <Link href="/map" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                  Explore Map
+                </Link>
+                <Link href="/upload" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                  Upload Photos
                 </Link>
                 <Link href="/profile" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
                   Profile
