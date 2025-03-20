@@ -1,12 +1,14 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { NextAuthOptions } from "next-auth";
+import { createSafePrismaAdapter } from "@/lib/next-auth-prisma-adapter";
+import type { NextAuthOptions } from "next-auth";
+import type { User } from "next-auth";
 
+// Define authOptions separately for reuse elsewhere
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: createSafePrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -14,31 +16,47 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        if (!user || !user?.hashedPassword) {
-          throw new Error("Invalid credentials");
+        // Skip database connection during build time
+        if (process.env.VERCEL_ENV === 'build') {
+          return null;
         }
 
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.hashedPassword
-        );
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
 
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
+          if (!user || !user?.hashedPassword) {
+            throw new Error("Invalid credentials");
+          }
+
+          const isCorrectPassword = await bcrypt.compare(
+            credentials.password,
+            user.hashedPassword
+          );
+
+          if (!isCorrectPassword) {
+            throw new Error("Invalid credentials");
+          }
+
+          // Return only the fields NextAuth expects for User
+          return {
+            id: user.id,
+            name: user.name || undefined,
+            email: user.email || undefined,
+            image: user.image || undefined,
+          };
+        } catch (error) {
+          console.error("Error in authorize:", error);
+          return null;
         }
-
-        return user;
       },
     }),
   ],
@@ -50,14 +68,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
-        if (token.name) {
+        if (token.name && typeof token.name === 'string') {
           session.user.name = token.name;
         }
       }
       return session;
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (user && typeof user.name === 'string') {
         token.name = user.name;
       }
       return token;
@@ -66,9 +84,12 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-build-only',
 };
 
+// Create the NextAuth handler
 const handler = NextAuth(authOptions);
 
+// Export the handler with named exports for GET and POST
 export { handler as GET, handler as POST }; 
