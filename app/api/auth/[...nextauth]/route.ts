@@ -17,35 +17,48 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
+        console.log("Starting authorization process");
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+          console.error("Missing credentials");
+          throw new Error("Email and password are required");
         }
 
         // Skip database connection during build time
         if (process.env.VERCEL_ENV === 'build') {
+          console.log("Skipping auth in build environment");
           return null;
         }
 
         try {
+          console.log(`Looking up user with email: ${credentials.email}`);
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email,
             },
           });
 
-          if (!user || !user?.hashedPassword) {
-            throw new Error("Invalid credentials");
+          if (!user) {
+            console.error("User not found");
+            throw new Error("Invalid email or password");
           }
 
+          if (!user.hashedPassword) {
+            console.error("User has no password set");
+            throw new Error("Invalid account setup. Please contact support.");
+          }
+
+          console.log("Comparing passwords");
           const isCorrectPassword = await bcrypt.compare(
             credentials.password,
             user.hashedPassword
           );
 
           if (!isCorrectPassword) {
-            throw new Error("Invalid credentials");
+            console.error("Password mismatch");
+            throw new Error("Invalid email or password");
           }
 
+          console.log("Authentication successful");
           // Return only the fields NextAuth expects for User
           return {
             id: user.id,
@@ -54,7 +67,7 @@ export const authOptions: NextAuthOptions = {
             image: user.image || undefined,
           };
         } catch (error) {
-          console.error("Error in authorize:", error);
+          console.error("Authentication error:", error);
           return null;
         }
       },
@@ -62,7 +75,7 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/login",
-    error: "/login",
+    error: "/auth/error",
   },
   callbacks: {
     async session({ session, token }) {
