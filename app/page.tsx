@@ -116,7 +116,7 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-2">
               <div className="h-48 bg-gray-200 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80" 
+                  src="/images/destinations/venice.jpg" 
                   alt="Venice Canals"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
@@ -135,7 +135,7 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-2">
               <div className="h-48 bg-gray-200 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1546412414-e1885e51148b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80" 
+                  src="/images/destinations/kyoto.jpg" 
                   alt="Kyoto Temple"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
@@ -154,7 +154,7 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-2">
               <div className="h-48 bg-gray-200 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1525874684015-58379d421a52?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80" 
+                  src="/images/destinations/santorini.jpg" 
                   alt="Santorini"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
