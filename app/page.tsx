@@ -115,17 +115,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
-                  <img 
-                    src="/images/testimonials/user1.jpg" 
-                    alt="User Avatar"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = 'https://ui-avatars.com/api/?name=Sarah+L&background=0D8ABC&color=fff';
-                    }}
-                  />
+                <div className="h-12 w-12 rounded-full bg-blue-100 overflow-hidden mr-4 flex items-center justify-center text-primary font-bold">
+                  SL
                 </div>
                 <div>
                   <h4 className="font-semibold">Sarah L.</h4>
@@ -142,17 +133,8 @@ export default function Home() {
             
             <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
-                  <img 
-                    src="/images/testimonials/user2.jpg" 
-                    alt="User Avatar"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = 'https://ui-avatars.com/api/?name=Miguel+R&background=4C1D95&color=fff';
-                    }}
-                  />
+                <div className="h-12 w-12 rounded-full bg-purple-100 overflow-hidden mr-4 flex items-center justify-center text-purple-600 font-bold">
+                  MR
                 </div>
                 <div>
                   <h4 className="font-semibold">Miguel R.</h4>
@@ -169,17 +151,8 @@ export default function Home() {
             
             <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
-                  <img 
-                    src="/images/testimonials/user3.jpg" 
-                    alt="User Avatar"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = 'https://ui-avatars.com/api/?name=Aisha+K&background=059669&color=fff';
-                    }}
-                  />
+                <div className="h-12 w-12 rounded-full bg-green-100 overflow-hidden mr-4 flex items-center justify-center text-green-600 font-bold">
+                  AK
                 </div>
                 <div>
                   <h4 className="font-semibold">Aisha K.</h4>
