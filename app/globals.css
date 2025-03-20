@@ -40,4 +40,32 @@ body {
 
 .animate-fade-in-up {
   animation: fade-in-up 1s ease-out forwards;
+}
+
+/* Fix z-index issues with Leaflet maps */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-pane,
+.leaflet-control {
+  z-index: 400 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 500 !important;
+}
+
+/* Fix for navbar stability */
+nav.fixed {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000 !important;
+}
+
+/* Ensure dropdown menus are always on top */
+[data-menu-content] {
+  z-index: 1001 !important;
 } 

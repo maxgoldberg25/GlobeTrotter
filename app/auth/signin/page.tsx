@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default function SignIn() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams?.get('callbackUrl') || '/';
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +50,7 @@ export default function SignIn() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <Link href="/auth/signup" className="font-medium text-primary hover:text-primary-dark">
+            <Link href="/signup" className="font-medium text-primary hover:text-primary-dark">
               create a new account
             </Link>
           </p>
@@ -110,7 +110,7 @@ export default function SignIn() {
             </div>
 
             <div className="text-sm">
-              <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-primary-dark">
+              <Link href="/forgot-password" className="font-medium text-primary hover:text-primary-dark">
                 Forgot your password?
               </Link>
             </div>

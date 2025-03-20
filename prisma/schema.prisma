@@ -68,6 +68,7 @@ model Photo {
   id          String   @id @default(cuid())
   title       String
   description String?  @db.Text
+  location    String?
   imageUrl    String
   latitude    Float
   longitude   Float

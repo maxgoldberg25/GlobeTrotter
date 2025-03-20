@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import PageContainer from '../components/PageContainer';
 
 export default function Dashboard() {
   const [userName, setUserName] = useState('Traveler');
@@ -17,7 +18,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <PageContainer>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Welcome, {userName}!</h1>
         <p className="text-gray-600 mt-2">Your adventure dashboard</p>
@@ -44,6 +45,6 @@ export default function Dashboard() {
           <button className="btn-primary">Find Friends</button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 } 

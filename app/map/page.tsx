@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import PageContainer from '../components/PageContainer';
 
 // Dynamically import the InteractiveMap component with no SSR
 // This is necessary because Leaflet requires the window object
@@ -12,7 +13,7 @@ const InteractiveMap = dynamic(
 
 export default function Map() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <PageContainer>
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Interactive Travel Map</h1>
         
@@ -118,6 +119,6 @@ export default function Map() {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 } 

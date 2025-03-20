@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import PageContainer from '../components/PageContainer';
 
 interface FAQItem {
   question: string;
@@ -59,8 +60,8 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <PageContainer className="bg-gray-50">
+      <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
           <p className="text-xl text-gray-600">
@@ -113,6 +114,6 @@ export default function FAQ() {
           </Link>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 } 

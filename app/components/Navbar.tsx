@@ -1,123 +1,378 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
-  const isLoggedIn = status === 'authenticated';
-  const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut({ redirect: false });
-    router.push('/');
-    router.refresh();
+  // Close menus when pathname changes (navigation)
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setUserMenuOpen(false);
+  }, [pathname]);
+
+  // Track scroll position for styling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // Only close menus if the click is not on a menu item or toggle button
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-menu-toggle]') && !target.closest('[data-menu-content]')) {
+        setIsMenuOpen(false);
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  // Handle mobile menu toggle
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(!isMenuOpen);
   };
 
+  // Handle user menu toggle
+  const toggleUserMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const handleSignOut = (e: React.MouseEvent) => {
+    e.preventDefault();
+    signOut({ callbackUrl: "/" });
+  };
+
+  const isHomePage = pathname === "/";
+  
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-primary">
-                GlobeTrotter
+    <nav
+      className={`fixed w-full transition-all duration-300 pointer-events-auto ${
+        scrolled || !isHomePage
+          ? "bg-white shadow-md py-2"
+          : "bg-transparent py-4"
+      }`}
+    >
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="relative h-8 w-8">
+            <Image
+              src="/images/logo.svg"
+              alt="GlobeTrotter Logo"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span
+            className={`font-bold text-xl ${
+              scrolled || !isHomePage ? "text-primary" : "text-white"
+            }`}
+          >
+            GlobeTrotter
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex md:items-center md:space-x-6">
+          <Link
+            href="/map"
+            className={`${
+              scrolled || !isHomePage ? "text-gray-700" : "text-white"
+            } hover:text-primary transition-colors font-medium`}
+          >
+            Explore Map
+          </Link>
+          {status === "authenticated" && (
+            <>
+              <Link
+                href="/upload"
+                className={`${
+                  scrolled || !isHomePage ? "text-gray-700" : "text-white"
+                } hover:text-primary transition-colors font-medium`}
+              >
+                Upload Photos
+              </Link>
+              <Link
+                href="/profile"
+                className={`${
+                  scrolled || !isHomePage ? "text-gray-700" : "text-white"
+                } hover:text-primary transition-colors font-medium`}
+              >
+                My Profile
+              </Link>
+            </>
+          )}
+          <Link
+            href="/contact"
+            className={`${
+              scrolled || !isHomePage ? "text-gray-700" : "text-white"
+            } hover:text-primary transition-colors font-medium`}
+          >
+            Contact
+          </Link>
+
+          {/* Auth Buttons or User Menu */}
+          {status === "loading" ? (
+            <div className="h-10 w-20 bg-gray-200 animate-pulse rounded"></div>
+          ) : status === "authenticated" ? (
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={toggleUserMenu}
+                className="flex items-center space-x-2 focus:outline-none"
+                data-menu-toggle="user"
+              >
+                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  {session?.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt="Profile"
+                      width={32}
+                      height={32}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-gray-600">
+                      {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
+                    </span>
+                  )}
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 transition-transform ${
+                    userMenuOpen ? "transform rotate-180" : ""
+                  } ${scrolled || !isHomePage ? "text-gray-700" : "text-white"}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* User Dropdown Menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" data-menu-content="user">
+                  <div className="px-4 py-2 border-b">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {session?.user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {session?.user?.email}
+                    </p>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Your Profile
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex space-x-2">
+              <Link
+                href="/login"
+                className={`px-4 py-2 rounded-md ${
+                  scrolled || !isHomePage
+                    ? "text-primary border border-primary hover:bg-primary hover:text-white"
+                    : "text-white border border-white hover:bg-white hover:text-primary"
+                } transition-colors`}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark transition-colors"
+              >
+                Sign up
               </Link>
             </div>
-          </div>
-          
-          {/* Mobile menu button */}
-          <div className="flex items-center sm:hidden">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-primary hover:bg-gray-100 focus:outline-none"
-              aria-controls="mobile-menu"
-              aria-expanded="false"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={toggleMenu}
+          className="md:hidden focus:outline-none"
+          data-menu-toggle="mobile"
+          aria-label="Toggle menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-6 w-6 ${
+              scrolled || !isHomePage ? "text-gray-700" : "text-white"
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            {isMenuOpen ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white shadow-lg py-2 px-4" data-menu-content="mobile">
+          <div className="flex flex-col space-y-3">
+            <Link
+              href="/map"
+              className="text-gray-700 hover:text-primary py-2"
+              onClick={() => setIsMenuOpen(false)}
             >
-              <span className="sr-only">Open main menu</span>
-              {!isMenuOpen ? (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              ) : (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </button>
-          </div>
-          
-          {/* Desktop menu */}
-          <div className="hidden sm:flex sm:items-center sm:space-x-4">
-            <Link href="/map" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
               Explore Map
             </Link>
-
-            {isLoggedIn ? (
+            {status === "authenticated" && (
               <>
-                <Link href="/upload" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                <Link
+                  href="/upload"
+                  className="text-gray-700 hover:text-primary py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   Upload Photos
                 </Link>
-                <Link href="/profile" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                  Profile
-                </Link>
-                <button 
-                  onClick={handleSignOut}
-                  className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+                <Link
+                  href="/profile"
+                  className="text-gray-700 hover:text-primary py-2"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/signin" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                  Sign In
-                </Link>
-                <Link href="/auth/signup" className="bg-primary text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600">
-                  Sign Up
+                  My Profile
                 </Link>
               </>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu, show/hide based on menu state */}
-      {isMenuOpen && (
-        <div className="sm:hidden" id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link href="/map" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-              Explore Map
+            <Link
+              href="/contact"
+              className="text-gray-700 hover:text-primary py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </Link>
-
-            {isLoggedIn ? (
+            {status === "loading" ? (
+              <div className="h-10 w-20 bg-gray-200 animate-pulse rounded"></div>
+            ) : status === "authenticated" ? (
               <>
-                <Link href="/upload" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-                  Upload Photos
-                </Link>
-                <Link href="/profile" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-                  Profile
-                </Link>
-                <button 
-                  onClick={handleSignOut}
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                <div className="py-2 border-t border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {session?.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt="Profile"
+                          width={32}
+                          height={32}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-medium text-gray-600">
+                          {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {session?.user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <Link
+                  href="/settings"
+                  className="text-gray-700 hover:text-primary py-2"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign Out
+                  Settings
+                </Link>
+                <button
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    handleSignOut(e);
+                  }}
+                  className="text-left text-gray-700 hover:text-primary py-2"
+                >
+                  Sign out
                 </button>
               </>
             ) : (
-              <>
-                <Link href="/auth/signin" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-                  Sign In
+              <div className="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-md text-center text-primary border border-primary hover:bg-primary hover:text-white transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Log in
                 </Link>
-                <Link href="/auth/signup" className="bg-primary text-white block px-3 py-2 rounded-md text-base font-medium">
-                  Sign Up
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 rounded-md text-center bg-primary text-white hover:bg-primary-dark transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign up
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>

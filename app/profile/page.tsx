@@ -1,82 +1,145 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import PageContainer from "../components/PageContainer";
+
+interface Photo {
+  id: number | string;
+  title: string;
+  location: string;
+  imageUrl: string;
+  latitude: number;
+  longitude: number;
+  createdAt: string;
+}
 
 export default function Profile() {
-  const [profile, setProfile] = useState({
-    name: 'John Doe',
-    bio: 'Passionate traveler exploring the world one country at a time.',
-    location: 'San Francisco, CA',
-    photoCount: 0,
-    followersCount: 0,
-    followingCount: 0,
-  });
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+
+    if (status === "authenticated" && session?.user) {
+      // Fetch user photos
+      // This would be replaced with an actual API call in production
+      setUserPhotos([
+        {
+          id: 1,
+          title: "Eiffel Tower",
+          location: "Paris, France",
+          imageUrl: "/images/map/eiffel.jpg",
+          latitude: 48.8584,
+          longitude: 2.2945,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          title: "Venice Canals",
+          location: "Venice, Italy",
+          imageUrl: "/images/map/venice.jpg",
+          latitude: 45.4408,
+          longitude: 12.3155,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      setLoading(false);
+    }
+  }, [status, session, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Cover photo */}
-          <div className="h-48 bg-gradient-to-r from-blue-500 to-primary"></div>
-          
-          {/* Profile info */}
-          <div className="px-6 py-6">
-            <div className="flex flex-col md:flex-row items-center">
-              {/* Profile picture */}
-              <div className="relative -mt-16 md:-mt-24 mb-4 md:mb-0 md:mr-6">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white bg-gray-200 flex items-center justify-center text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              </div>
-              
-              {/* User info */}
-              <div className="text-center md:text-left">
-                <h1 className="text-2xl font-bold">{profile.name}</h1>
-                <p className="text-gray-600">{profile.location}</p>
-                <p className="mt-2">{profile.bio}</p>
-                <div className="mt-4 flex justify-center md:justify-start space-x-4">
-                  <div className="text-center">
-                    <span className="block font-bold">{profile.photoCount}</span>
-                    <span className="text-gray-600 text-sm">Photos</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block font-bold">{profile.followersCount}</span>
-                    <span className="text-gray-600 text-sm">Followers</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block font-bold">{profile.followingCount}</span>
-                    <span className="text-gray-600 text-sm">Following</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Edit profile button */}
-              <div className="md:ml-auto mt-6 md:mt-0">
-                <button className="btn-secondary">Edit Profile</button>
-              </div>
-            </div>
+    <PageContainer>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="flex flex-col md:flex-row items-center">
+          <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 md:mb-0 md:mr-6 flex items-center justify-center overflow-hidden">
+            {session?.user?.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.name || "Profile"}
+                width={128}
+                height={128}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <span className="text-4xl text-gray-400">
+                {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
+              </span>
+            )}
           </div>
-        </div>
-        
-        {/* Photos Grid - Empty State */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">My Travel Photos</h2>
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">No photos yet</h3>
-            <p className="mt-1 text-gray-500">Upload your first travel photo to start your journey!</p>
-            <div className="mt-6">
-              <button className="btn-primary">Upload Photo</button>
+          <div>
+            <h1 className="text-2xl font-bold">{session?.user?.name || "User"}</h1>
+            <p className="text-gray-600">{session?.user?.email}</p>
+            <div className="mt-4">
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                onClick={() => alert("Edit profile functionality would go here")}
+              >
+                Edit Profile
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <h2 className="text-2xl font-bold mb-4">My Travel Photos</h2>
+      
+      {userPhotos.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <p className="text-gray-600 mb-4">You haven't uploaded any photos yet.</p>
+          <Link 
+            href="/upload" 
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Upload Your First Photo
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {userPhotos.map((photo) => (
+            <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="h-48 relative">
+                <Image
+                  src={photo.imageUrl}
+                  alt={photo.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-lg">{photo.title}</h3>
+                <p className="text-gray-600">{photo.location}</p>
+                <div className="flex justify-between mt-2">
+                  <span className="text-sm text-gray-500">
+                    {new Date(photo.createdAt).toLocaleDateString()}
+                  </span>
+                  <Link
+                    href={`/map?lat=${photo.latitude}&lng=${photo.longitude}`}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    View on Map
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </PageContainer>
   );
 } 

@@ -4,9 +4,20 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import Image from 'next/image';
+
+// Define the SampleLocation interface based on our sample data structure
+interface SampleLocation {
+  id: number;
+  position: [number, number];
+  title: string;
+  description: string;
+  imageUrl: string;
+  user: string;
+}
 
 // Sample data for locations with photos
-const sampleLocations = [
+const sampleLocations: SampleLocation[] = [
   {
     id: 1,
     position: [48.8584, 2.2945],
@@ -33,26 +44,47 @@ const sampleLocations = [
   }
 ];
 
-export default function InteractiveMap() {
-  // Hover state for marker highlights
-  const [activeMarkerId, setActiveMarkerId] = useState<number | null>(null);
+// Fix Leaflet marker icon issues on client side
+const useLeafletIcon = () => {
+  const [icon, setIcon] = useState<L.Icon | null>(null);
   
   useEffect(() => {
-    // Fix the missing icon issue in Leaflet with Next.js
+    // Fix the issue with Leaflet icons in Next.js
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     
+    // Set default icon paths directly
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+      iconUrl: '/images/map/marker-icon.png',
+      shadowUrl: '/images/map/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
     });
+    
+    // Create and set the icon
+    setIcon(new L.Icon({
+      iconUrl: '/images/map/marker-icon.png',
+      shadowUrl: '/images/map/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    }));
   }, []);
   
+  return icon;
+};
+
+export default function InteractiveMap() {
+  const [activeLocation, setActiveLocation] = useState<SampleLocation | null>(null);
+  const icon = useLeafletIcon();
+  
   return (
-    <div className="h-[70vh] w-full rounded-lg overflow-hidden shadow-lg">
-      <MapContainer 
-        center={[20, 0]} // Center map at 0,0 coordinates (middle of the world)
-        zoom={2} 
+    <div className="h-full w-full">
+      <MapContainer
+        center={[20, 0]}
+        zoom={2}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
@@ -61,30 +93,46 @@ export default function InteractiveMap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
+        {/* Display sample locations */}
         {sampleLocations.map((location) => (
           <Marker 
-            key={location.id}
-            position={location.position as [number, number]}
+            key={location.title} 
+            position={location.position}
+            icon={icon || new L.Icon.Default()}
             eventHandlers={{
-              mouseover: () => setActiveMarkerId(location.id),
-              mouseout: () => setActiveMarkerId(null),
-              click: () => console.log(`Clicked on ${location.title}`)
+              click: () => {
+                setActiveLocation(location);
+              },
+            }}
+          />
+        ))}
+        
+        {/* Custom popup for the active location */}
+        {activeLocation && (
+          <Popup
+            position={activeLocation.position}
+            eventHandlers={{
+              popupclose: () => setActiveLocation(null)
             }}
           >
-            <Popup>
-              <div className="w-60">
-                <h3 className="font-semibold text-lg">{location.title}</h3>
-                <img 
-                  src={location.imageUrl} 
-                  alt={location.title} 
-                  className="my-2 rounded-md w-full h-32 object-cover"
+            <div className="w-64 p-1">
+              <h3 className="text-lg font-semibold mb-1">{activeLocation.title}</h3>
+              <div className="mb-2 overflow-hidden rounded-md">
+                <Image
+                  src={activeLocation.imageUrl}
+                  alt={activeLocation.title}
+                  width={250}
+                  height={150}
+                  className="object-cover"
                 />
-                <p className="text-sm text-gray-600">{location.description}</p>
-                <p className="text-xs text-gray-500 mt-2">Shared by @{location.user}</p>
               </div>
-            </Popup>
-          </Marker>
-        ))}
+              <p className="text-sm mb-2">{activeLocation.description}</p>
+              <div className="text-xs text-gray-500">
+                <span>Photo by @{activeLocation.user}</span>
+              </div>
+            </div>
+          </Popup>
+        )}
       </MapContainer>
     </div>
   );
