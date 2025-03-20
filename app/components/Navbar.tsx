@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { useSignOut } from "../lib/auth";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const handleSignOutAction = useSignOut();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Close menus when pathname changes (navigation)
   useEffect(() => {
@@ -64,9 +67,24 @@ export default function Navbar() {
     setUserMenuOpen(!userMenuOpen);
   };
 
-  const handleSignOut = (e: React.MouseEvent) => {
+  const handleSignOut = async (e: React.MouseEvent) => {
     e.preventDefault();
-    signOut({ callbackUrl: "/" });
+    
+    // Close any open menus first
+    setIsMenuOpen(false);
+    setUserMenuOpen(false);
+    
+    // Set signing out state
+    setIsSigningOut(true);
+    
+    try {
+      // Sign out using our enhanced hook
+      await handleSignOutAction();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   const isHomePage = pathname === "/";
@@ -209,8 +227,19 @@ export default function Navbar() {
                   <button
                     onClick={handleSignOut}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    disabled={isSigningOut}
                   >
-                    Sign out
+                    {isSigningOut ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Signing out...
+                      </span>
+                    ) : (
+                      "Sign out"
+                    )}
                   </button>
                 </div>
               )}
@@ -352,8 +381,19 @@ export default function Navbar() {
                     handleSignOut(e);
                   }}
                   className="text-left text-gray-700 hover:text-primary py-2"
+                  disabled={isSigningOut}
                 >
-                  Sign out
+                  {isSigningOut ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Signing out...
+                    </span>
+                  ) : (
+                    "Sign out"
+                  )}
                 </button>
               </>
             ) : (

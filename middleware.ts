@@ -1,38 +1,48 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-
-  // List of paths that require authentication
-  const protectedPaths = [
-    '/profile',
-    '/upload',
-    '/settings',
-  ];
-
-  // Check if the path is in the protected list
-  const isProtectedPath = protectedPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  // Redirect to login if accessing a protected route without authentication
-  if (isProtectedPath && !token) {
-    const loginUrl = new URL('/auth/signin', request.url);
-    loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+  const isAuthenticated = !!token;
+  const isAuthPage = 
+    request.nextUrl.pathname.startsWith('/login') || 
+    request.nextUrl.pathname.startsWith('/signup') ||
+    request.nextUrl.pathname.startsWith('/auth');
+  
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  
+  // If the user is on a protected route without authentication, redirect to login
+  if (!isAuthenticated && 
+      !isAuthPage && 
+      !isApiRoute && 
+      (
+        request.nextUrl.pathname.startsWith('/profile') ||
+        request.nextUrl.pathname.startsWith('/upload') ||
+        request.nextUrl.pathname.startsWith('/dashboard')
+      )
+     ) {
+    // Store the original URL in the search parameters
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('callbackUrl', encodeURI(request.url));
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect to home if the user is already authenticated but tries to access login/signup
-  if (token && (
-    request.nextUrl.pathname.startsWith('/auth/signin') || 
-    request.nextUrl.pathname.startsWith('/auth/signup')
-  )) {
-    return NextResponse.redirect(new URL('/', request.url));
+  // If the user is authenticated and visiting auth pages, redirect to profile
+  if (isAuthenticated && isAuthPage) {
+    return NextResponse.redirect(new URL('/profile', request.url));
   }
 
-  return NextResponse.next();
+  // Add auth state to request headers to make it available to pages
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-is-authenticated', isAuthenticated ? 'true' : 'false');
+
+  // Return the response with updated headers
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 // Only run middleware on matching routes

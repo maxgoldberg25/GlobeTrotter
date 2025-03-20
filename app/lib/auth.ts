@@ -1,5 +1,6 @@
-import { useSession } from 'next-auth/react';
-import { useEffect, useRef } from 'react';
+import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 /**
  * Hook to force session refresh when component mounts
@@ -20,22 +21,33 @@ export function useRefreshSession() {
 }
 
 /**
- * A simplified hook that only refreshes auth state when actually needed,
- * such as when the user explicitly navigates using browser controls
+ * Enhanced sign out function that ensures proper redirect and state cleanup
  */
-export function useAuthSync() {
+export function useSignOut() {
+  const router = useRouter();
+  
+  return useCallback(async () => {
+    // First perform the sign out
+    await nextAuthSignOut({
+      redirect: false,
+    });
+    
+    // Then manually navigate to ensure clean state
+    router.push('/');
+    router.refresh(); // Force a full refresh to ensure clean state
+  }, [router]);
+}
+
+/**
+ * Hook to track navigation and refresh session on back/forward navigation
+ */
+export function useNavigationAuth() {
   const { update } = useSession();
-  const lastUpdateRef = useRef<number>(Date.now());
   
   useEffect(() => {
-    // Only handle popstate events (back/forward navigation)
-    const handlePopState = () => {
-      // Debounce updates to prevent rapid re-renders
-      const now = Date.now();
-      if (now - lastUpdateRef.current > 1000) { // Only update once per second at most
-        lastUpdateRef.current = now;
-        update();
-      }
+    const handlePopState = async () => {
+      // When user navigates with browser buttons, force update session
+      await update();
     };
     
     window.addEventListener('popstate', handlePopState);
