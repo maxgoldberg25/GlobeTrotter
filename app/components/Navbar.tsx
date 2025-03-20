@@ -1,20 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === 'authenticated';
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // In a real app, this would check for a valid session/token
-  useEffect(() => {
-    // For demo purposes - check if we're on a protected page
-    const path = window.location.pathname;
-    if (path.includes('/dashboard') || path.includes('/profile')) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <nav className="bg-white shadow-md">
@@ -58,12 +59,6 @@ export default function Navbar() {
 
             {isLoggedIn ? (
               <>
-                <Link href="/dashboard" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                  Dashboard
-                </Link>
-                <Link href="/map" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                  Explore Map
-                </Link>
                 <Link href="/upload" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                   Upload Photos
                 </Link>
@@ -71,10 +66,7 @@ export default function Navbar() {
                   Profile
                 </Link>
                 <button 
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    window.location.href = '/';
-                  }}
+                  onClick={handleSignOut}
                   className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign Out
@@ -104,12 +96,6 @@ export default function Navbar() {
 
             {isLoggedIn ? (
               <>
-                <Link href="/dashboard" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-                  Dashboard
-                </Link>
-                <Link href="/map" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-                  Explore Map
-                </Link>
                 <Link href="/upload" className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
                   Upload Photos
                 </Link>
@@ -117,10 +103,7 @@ export default function Navbar() {
                   Profile
                 </Link>
                 <button 
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    window.location.href = '/';
-                  }}
+                  onClick={handleSignOut}
                   className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium w-full text-left"
                 >
                   Sign Out
