@@ -86,14 +86,13 @@ export default function Profile() {
     <PageContainer>
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex flex-col md:flex-row items-center">
-          <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 md:mb-0 md:mr-6 flex items-center justify-center overflow-hidden">
+          <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 md:mb-0 md:mr-6 flex items-center justify-center overflow-hidden relative">
             {session?.user?.image ? (
               <Image
                 src={session.user.image}
                 alt={session.user.name || "Profile"}
-                width={128}
-                height={128}
-                className="object-cover w-full h-full"
+                fill
+                className="object-cover"
               />
             ) : (
               <span className="text-4xl text-gray-400">
