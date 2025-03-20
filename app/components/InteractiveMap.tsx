@@ -9,27 +9,27 @@ import L from 'leaflet';
 const sampleLocations = [
   {
     id: 1,
-    position: [40.7128, -74.0060],
-    title: 'New York City',
-    description: 'The Big Apple',
-    imageUrl: 'https://via.placeholder.com/150',
-    user: 'johndoe'
+    position: [48.8584, 2.2945],
+    title: 'Eiffel Tower',
+    description: 'The iconic iron lattice tower on the Champ de Mars in Paris, France.',
+    imageUrl: '/images/map/eiffel.jpg',
+    user: 'traveler123'
   },
   {
     id: 2,
-    position: [48.8566, 2.3522],
-    title: 'Paris',
-    description: 'City of Lights',
-    imageUrl: 'https://via.placeholder.com/150',
-    user: 'janedoe'
+    position: [45.4408, 12.3155],
+    title: 'Venice',
+    description: 'The beautiful canal city in northeastern Italy, famous for its historic architecture and gondolas.',
+    imageUrl: '/images/map/venice.jpg',
+    user: 'italy_lover'
   },
   {
     id: 3,
-    position: [35.6762, 139.6503],
-    title: 'Tokyo',
-    description: 'Japan\'s capital',
-    imageUrl: 'https://via.placeholder.com/150',
-    user: 'bobsmith'
+    position: [35.0394, 135.7292],
+    title: 'Kinkaku-ji Temple',
+    description: 'The famous golden pavilion in Kyoto, Japan surrounded by beautiful gardens.',
+    imageUrl: '/images/map/kyoto.jpg',
+    user: 'zen_traveler'
   }
 ];
 
