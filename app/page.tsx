@@ -188,11 +188,18 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FAQ Link */}
-      <div className="bg-gray-100 py-6 text-center">
-        <Link href="/faq" className="text-primary hover:text-primary-dark font-medium transition-colors">
-          Have questions? Check out our FAQ
-        </Link>
+      {/* Footer Links */}
+      <div className="bg-gray-100 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center space-x-6">
+            <Link href="/contact" className="text-gray-600 hover:text-primary font-medium transition-colors">
+              Help
+            </Link>
+            <Link href="/faq" className="text-gray-600 hover:text-primary font-medium transition-colors">
+              FAQ
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
