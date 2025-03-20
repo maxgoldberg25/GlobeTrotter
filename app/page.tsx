@@ -187,6 +187,13 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* FAQ Link */}
+      <div className="bg-gray-100 py-6 text-center">
+        <Link href="/faq" className="text-primary hover:text-primary-dark font-medium transition-colors">
+          Have questions? Check out our FAQ
+        </Link>
+      </div>
     </div>
   );
 } 
