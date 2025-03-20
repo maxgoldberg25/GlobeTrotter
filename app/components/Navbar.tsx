@@ -145,6 +145,18 @@ export default function Navbar() {
               >
                 My Profile
               </Link>
+              
+              {/* Admin link only visible for admin user */}
+              {session?.user?.email === 'test@gmail.com' && (
+                <Link
+                  href="/admin"
+                  className={`${
+                    scrolled || !isHomePage ? "text-gray-700" : "text-white"
+                  } hover:text-primary transition-colors font-medium`}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
             </>
           )}
           <Link
@@ -217,6 +229,18 @@ export default function Navbar() {
                   >
                     Your Profile
                   </Link>
+                  
+                  {/* Admin link in dropdown for admin user */}
+                  {session?.user?.email === 'test@gmail.com' && (
+                    <Link
+                      href="/admin"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  
                   <Link
                     href="/settings"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

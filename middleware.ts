@@ -25,7 +25,8 @@ export async function middleware(request: NextRequest) {
         (
           request.nextUrl.pathname.startsWith('/profile') ||
           request.nextUrl.pathname.startsWith('/upload') ||
-          request.nextUrl.pathname.startsWith('/dashboard')
+          request.nextUrl.pathname.startsWith('/dashboard') ||
+          request.nextUrl.pathname.startsWith('/admin')
         )
       ) {
       // Store the original URL in the search parameters
@@ -62,6 +63,7 @@ export const config = {
     '/profile/:path*',
     '/upload/:path*',
     '/settings/:path*',
+    '/admin/:path*',
     '/auth/signin',
     '/auth/signup',
     '/login',

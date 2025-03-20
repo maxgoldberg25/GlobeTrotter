@@ -16,6 +16,7 @@ Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.ap
 - News feed
 - Notifications
 - Mobile-friendly responsive design
+- Admin dashboard for user management
 
 ## Getting Started
 
@@ -32,6 +33,17 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Admin Access
+
+To set up the admin user:
+
+1. Start the development server: `npm run dev`
+2. Run the admin setup script: `node scripts/setup-admin.js`
+3. Log in with the credentials:
+   - Email: `test@gmail.com` 
+   - Password: `Password`
+4. Access the admin dashboard at [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ## Deployment on Vercel
 
@@ -89,7 +101,7 @@ This project is set up for continuous deployment. Any changes pushed to the main
 3. ✅ Profile management UI
 4. ✅ Interactive Map Integration with Leaflet
 5. ✅ Photo upload & geolocation UI
-6. ⬜ Backend implementation
+6. ✅ Admin dashboard
 7. ⬜ Social connectivity
 8. ⬜ Notifications
 9. ⬜ Mobile optimization
