@@ -102,6 +102,101 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Testimonials Section */}
+      <div className="bg-blue-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">What Our Travelers Say</h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Real experiences from our community of global explorers
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
+                  <img 
+                    src="/images/testimonials/user1.jpg" 
+                    alt="User Avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = 'https://ui-avatars.com/api/?name=Sarah+L&background=0D8ABC&color=fff';
+                    }}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-semibold">Sarah L.</h4>
+                  <p className="text-sm text-gray-500">35 countries visited</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">
+                "GlobeTrotter has completely changed how I document my travels. The map feature makes it so easy to visualize my journey and share it with friends. I've connected with so many fellow travelers!"
+              </p>
+              <div className="mt-4 flex">
+                <span className="text-yellow-500">★★★★★</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
+                  <img 
+                    src="/images/testimonials/user2.jpg" 
+                    alt="User Avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = 'https://ui-avatars.com/api/?name=Miguel+R&background=4C1D95&color=fff';
+                    }}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-semibold">Miguel R.</h4>
+                  <p className="text-sm text-gray-500">Digital nomad</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">
+                "As someone who's constantly on the move, I needed a simple way to track and share my experiences. GlobeTrotter is intuitive and beautifully designed. The community aspect is what keeps me coming back."
+              </p>
+              <div className="mt-4 flex">
+                <span className="text-yellow-500">★★★★★</span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-6 transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden mr-4">
+                  <img 
+                    src="/images/testimonials/user3.jpg" 
+                    alt="User Avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = 'https://ui-avatars.com/api/?name=Aisha+K&background=059669&color=fff';
+                    }}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-semibold">Aisha K.</h4>
+                  <p className="text-sm text-gray-500">Travel photographer</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">
+                "As a photographer, image quality and presentation are important to me. GlobeTrotter lets me showcase my work beautifully while connecting each photo to its exact location. It's become an essential part of my portfolio."
+              </p>
+              <div className="mt-4 flex">
+                <span className="text-yellow-500">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Testimonials/Social Proof with image hover effects */}
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
