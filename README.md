@@ -17,6 +17,7 @@ Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.ap
 - Notifications
 - Mobile-friendly responsive design
 - Admin dashboard for user management
+- Contact page with email functionality
 
 ## Getting Started
 
@@ -33,6 +34,20 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Email Functionality
+
+To enable the contact form emails:
+
+1. Set up the following environment variables in your `.env` file:
+   ```
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASSWORD=your_app_password
+   ```
+   
+   For Gmail, you'll need to use an app password. See [Google Account Help](https://support.google.com/accounts/answer/185833) for instructions.
+   
+2. The contact form is pre-configured to send emails to `welliberg@gmail.com`.
 
 ### Admin Access
 
@@ -67,6 +82,8 @@ To set up the admin user:
    - `DATABASE_URL`: Your PostgreSQL connection string
    - `NEXTAUTH_URL`: Your production URL (e.g., `https://your-app.vercel.app`)
    - `NEXTAUTH_SECRET`: A secure random string (generate with `openssl rand -base64 32`)
+   - `EMAIL_USER`: Your email address for the contact form
+   - `EMAIL_PASSWORD`: Your email app password
    
    Optional (for social login):
    - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
@@ -102,9 +119,10 @@ This project is set up for continuous deployment. Any changes pushed to the main
 4. ✅ Interactive Map Integration with Leaflet
 5. ✅ Photo upload & geolocation UI
 6. ✅ Admin dashboard
-7. ⬜ Social connectivity
-8. ⬜ Notifications
-9. ⬜ Mobile optimization
+7. ✅ Contact page with email functionality
+8. ⬜ Social connectivity
+9. ⬜ Notifications
+10. ⬜ Mobile optimization
 
 ## Technologies Used
 
@@ -115,4 +133,5 @@ This project is set up for continuous deployment. Any changes pushed to the main
 - Leaflet (for interactive maps)
 - Prisma (ORM)
 - NextAuth.js (authentication)
+- Nodemailer (email functionality)
 - Vercel (hosting platform)
