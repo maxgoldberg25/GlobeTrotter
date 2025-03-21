@@ -5,7 +5,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// PrismaClient is attached to the `global` object in development to prevent
+// PrismaClient is attached to the `global` object in development to prevent.
 // exhausting your database connection limit
 export const prisma = 
   globalForPrisma.prisma ??
