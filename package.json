@@ -16,6 +16,7 @@
   "description": "A social platform for travelers to share their journey",
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
+    "@neondatabase/serverless": "^0.10.4",
     "@prisma/client": "^6.5.0",
     "bcryptjs": "^3.0.2",
     "eslint-config-next": "^13.4.19",
