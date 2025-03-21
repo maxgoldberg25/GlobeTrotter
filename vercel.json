@@ -1,6 +1,6 @@
 {
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"build\" ]; then echo \"Skip build step in build phase\"; exit 0; fi",
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then echo \"Running in production\"; else echo \"Skip build step in preview\"; exit 0; fi",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next"
