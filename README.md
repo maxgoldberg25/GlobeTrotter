@@ -19,6 +19,27 @@ Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.ap
 - Admin dashboard for user management
 - Contact page with email functionality
 
+## Database Setup
+
+This project uses [Neon](https://neon.tech) for the PostgreSQL database, integrated with Vercel deployment.
+
+### Database Tables
+- User (authentication and user data)
+- Account (OAuth connections)
+- Session (active sessions)
+- VerificationToken
+- Photo
+- Follow
+- playing_with_neon
+
+### Database Management
+- **View Database**: Access through [Neon Console](https://console.neon.tech)
+- **Local Development**: Use Prisma Studio
+  ```bash
+  npx prisma studio
+  ```
+  This opens a GUI at http://localhost:5555
+
 ## Getting Started
 
 First, install the dependencies:
@@ -34,6 +55,26 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Environment Variables
+
+Required environment variables:
+```env
+# Database Configuration
+DATABASE_URL=postgresql://user:password@hostname/database
+PGHOST=hostname
+PGUSER=user
+PGPASSWORD=password
+PGDATABASE=database
+
+# Email Configuration
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+
+# Auth Configuration
+NEXTAUTH_URL=your_production_url
+NEXTAUTH_SECRET=your_secret
+```
 
 ### Email Functionality
 
@@ -62,10 +103,12 @@ To set up the admin user:
 
 ## Deployment on Vercel
 
+The project is configured for deployment on Vercel with Neon PostgreSQL integration.
+
 ### Prerequisites
 
 1. A [Vercel](https://vercel.com) account
-2. A PostgreSQL database (e.g., [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres), [Supabase](https://supabase.com), [Railway](https://railway.app), or [Neon](https://neon.tech))
+2. A [Neon](https://neon.tech) account for the PostgreSQL database
 
 ### Steps to Deploy
 
@@ -76,36 +119,17 @@ To set up the admin user:
    - Click "Add New" > "Project"
    - Select your repository and click "Import"
 
-3. **Configure Environment Variables**:
-   In the Vercel project settings, add the following environment variables:
-   
-   - `DATABASE_URL`: Your PostgreSQL connection string
+3. **Set up Neon Integration**:
+   - In Vercel, go to Storage
+   - Add Neon integration
+   - Connect to your project
+
+4. **Configure Environment Variables**:
+   Vercel will automatically set up database variables. Add the remaining variables:
    - `NEXTAUTH_URL`: Your production URL (e.g., `https://your-app.vercel.app`)
    - `NEXTAUTH_SECRET`: A secure random string (generate with `openssl rand -base64 32`)
    - `EMAIL_USER`: Your email address for the contact form
    - `EMAIL_PASSWORD`: Your email app password
-   
-   Optional (for social login):
-   - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
-   - `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET`
-
-4. **Deploy**:
-   - Click "Deploy" and wait for the build to complete
-   
-5. **Run Database Migrations**:
-   After deployment, you need to run the database migrations:
-   
-   ```bash
-   # Install Vercel CLI if you haven't already
-   npm i -g vercel
-   
-   # Log in to Vercel
-   vercel login
-   
-   # Run migrations on the production database
-   vercel env pull .env.production
-   npx prisma migrate deploy
-   ```
 
 ### Continuous Deployment
 
@@ -135,3 +159,4 @@ This project is set up for continuous deployment. Any changes pushed to the main
 - NextAuth.js (authentication)
 - Nodemailer (email functionality)
 - Vercel (hosting platform)
+- Neon (PostgreSQL database)
