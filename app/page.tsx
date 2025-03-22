@@ -265,11 +265,6 @@ export default function Home() {
           </Link>
         </div>
       </div>
-
-      <form action={create}>
-        <input type="text" placeholder="write a comment" name="comment" />
-        <button type="submit">Submit</button>
-      </form>
     </div>
   );
 } 
