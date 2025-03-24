@@ -14,7 +14,7 @@ export default function Signup() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,16 +52,16 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError("");
     
     if (!validateForm()) {
+      setIsLoading(false);
       return;
     }
     
-    setLoading(true);
-    
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,16 +76,16 @@ export default function Signup() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create account");
+        throw new Error(data.error || data.message || "Failed to create account");
       }
       
       // Redirect to login page
-      router.push("/login?message=Account created successfully. Please log in.");
+      router.push("/login?message=Account created successfully! Please log in.");
     } catch (error: any) {
       console.error("Signup error:", error);
-      setError(error.message || "Something went wrong. Please try again.");
+      setError(error.message || "An error occurred during signup");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -184,12 +184,12 @@ export default function Signup() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
-              {loading ? (
+              {isLoading ? (
                 <span className="flex items-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
