@@ -5,11 +5,16 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-// Dynamically import the LeafletMap component with no SSR
-const LeafletMap = dynamic(
-  () => import('../components/LeafletMap'),
-  { ssr: false }
+// Dynamically import the Map component with SSR disabled
+const MapWithNoSSR = dynamic(
+  () => import('../components/MapComponent'), // Create this file
+  { 
+    ssr: false,
+    loading: () => <LoadingSpinner />
+  }
 );
 
 interface Photo {
@@ -84,35 +89,9 @@ export default function MapPage() {
       <h1 className="text-2xl font-bold mb-8">Explore Photos on the Map</h1>
       
       <div className="h-screen w-full pt-16">
-        <MapContainer
-          center={[photos[0].latitude, photos[0].longitude]}
-          zoom={13}
-          style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          {photos.map(photo => (
-            <Marker
-              key={photo.id}
-              position={[photo.latitude, photo.longitude]}
-            >
-              <Popup>
-                <div className="max-w-xs">
-                  <img 
-                    src={photo.imageUrl} 
-                    alt={photo.title}
-                    className="w-full h-32 object-cover mb-2"
-                  />
-                  <h3 className="font-bold">{photo.title}</h3>
-                  <p className="text-sm">{photo.location}</p>
-                  <p className="text-xs text-gray-500">By {photo.user.name}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+        <Suspense fallback={<LoadingSpinner />}>
+          <MapWithNoSSR />
+        </Suspense>
       </div>
       
       <div className="mt-6 text-gray-600 text-sm">
