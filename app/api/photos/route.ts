@@ -4,37 +4,37 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
+    const { title, imageUrl, location, latitude, longitude } = await request.json();
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
-    const body = await request.json();
-    const { title, location, latitude, longitude, imageUrl } = body;
-    
+    // Validate required fields
     if (!title || !imageUrl) {
       return NextResponse.json({ error: 'Title and image URL are required' }, { status: 400 });
     }
-    
-    // Create a new photo record
+
+    // Create photo WITHOUT attempting to save publicId
     const photo = await prisma.photo.create({
       data: {
         userId: session.user.id,
         title,
         imageUrl,
         location: location || null,
-        ...(latitude ? { latitude: parseFloat(latitude) } : {}),
-        ...(longitude ? { longitude: parseFloat(longitude) } : {}),
+        latitude: latitude || null,
+        longitude: longitude || null,
+        // DO NOT include publicId here
       },
     });
-    
-    return NextResponse.json({ success: true, photo });
+
+    return NextResponse.json(photo);
   } catch (error) {
     console.error('Error creating photo:', error);
     return NextResponse.json(
-      { error: 'Failed to create photo', details: error instanceof Error ? error.message : 'Unknown error' }, 
+      { error: 'Failed to create photo', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

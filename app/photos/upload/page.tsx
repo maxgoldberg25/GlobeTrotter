@@ -87,6 +87,36 @@ export default function UploadPhotoPage() {
     }
   };
 
+  const handleImageUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setImageUrl(data.url);
+      // Don't set publicId until database is updated
+      // setPublicId(data.public_id);
+      
+      return data.url;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -104,61 +134,40 @@ export default function UploadPhotoPage() {
     setError(null);
     
     try {
+      // Upload image if not already uploaded
       let finalImageUrl = imageUrl;
-      
-      // If user selected a file, upload it first
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        
-        try {
-          const uploadResponse = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-          
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.error || "Failed to upload image");
-          }
-          
-          const uploadData = await uploadResponse.json();
-          
-          // Now we have the Cloudinary URL and public ID
-          finalImageUrl = uploadData.url;
-          
-          // When creating the photo, include the publicId
-          const photoData = {
-            title,
-            location: location || null,
-            latitude: latitude ? Number(latitude) : null,
-            longitude: longitude ? Number(longitude) : null,
-            imageUrl: finalImageUrl,
-          };
-          
-          const response = await fetch("/api/photos", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(photoData),
-          });
-          
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "Failed to save photo");
-          }
-          
-          setSuccess(true);
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 2000);
-        } catch (error) {
-          setError(error instanceof Error ? error.message : "Failed to upload image");
-          setUploading(false);
-          return;
-        }
+      if (imageFile && !imageUrl) {
+        finalImageUrl = await handleImageUpload(imageFile);
+        if (!finalImageUrl) return;
       }
+      
+      // Create photo data WITHOUT publicId
+      const photoData = {
+        title,
+        location,
+        latitude: latitude ? Number(latitude) : null,
+        longitude: longitude ? Number(longitude) : null,
+        imageUrl: finalImageUrl,
+        // Don't include publicId
+      };
+      
+      const response = await fetch("/api/photos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(photoData),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save photo");
+      }
+      
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

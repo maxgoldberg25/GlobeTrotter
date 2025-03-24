@@ -2,12 +2,13 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
+import { Readable } from 'stream';
 
-// Add a type for the Cloudinary upload result
+// Add interface for Cloudinary result if needed
 interface CloudinaryUploadResult {
   secure_url: string;
   public_id: string;
-  [key: string]: any; // For other properties Cloudinary might return
+  [key: string]: any;
 }
 
 // You'll need to set up a proper file upload solution
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Upload to Cloudinary with proper typing
+    // Upload to Cloudinary
     const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { 
@@ -53,20 +54,20 @@ export async function POST(request: Request) {
       );
       
       // Convert buffer to stream and pipe to uploadStream
-      const Readable = require('stream').Readable;
-      const readableInstanceStream = new Readable({
+      const readableInstance = new Readable({
         read() {
           this.push(buffer);
           this.push(null);
         }
       });
       
-      readableInstanceStream.pipe(uploadStream);
+      readableInstance.pipe(uploadStream);
     });
     
-    // Return the Cloudinary URL - now TypeScript knows the shape of result
+    // Return only the secure_url - REMOVE publicId until database is migrated
     return NextResponse.json({ 
       url: result.secure_url,
+      // Don't include public_id until database schema is updated
       success: true 
     });
   } catch (error) {
