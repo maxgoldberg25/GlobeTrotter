@@ -176,3 +176,39 @@ This project is set up for continuous deployment. Any changes pushed to the main
 8. ⬜ Social connectivity
 9. ⬜ Notifications
 10. ⬜ Mobile optimization
+
+## Technologies & Tools
+
+### Frontend
+- **Framework**: Next.js 13 with App Router
+- **Language**: TypeScript
+- **UI Library**: React 18
+- **Styling**: Tailwind CSS
+- **Map Library**: Leaflet & React-Leaflet
+- **Form Handling**: React Hook Form
+- **State Management**: React Hooks & Context
+- **Toast Notifications**: React Hot Toast
+
+### Backend
+- **Runtime**: Node.js
+- **API**: Next.js API Routes
+- **Authentication**: NextAuth.js
+- **Database ORM**: Prisma
+- **Email Service**: Nodemailer
+
+### Database & Storage
+- **Database**: PostgreSQL (via Neon)
+- **Image Storage**: Cloudinary
+- **Caching**: Next.js built-in caching
+
+### Development Tools
+- **Version Control**: Git & GitHub
+- **IDE**: Visual Studio Code
+- **API Testing**: Postman
+- **Database Management**: Prisma Studio
+
+### Deployment & Infrastructure
+- **Hosting**: Vercel
+- **Database Hosting**: Neon
+- **CI/CD**: Vercel's GitHub Integration
+- **Environment Variables**: Vercel & .env.local
