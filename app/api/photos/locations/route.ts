@@ -14,8 +14,6 @@ export async function GET() {
       const results = await tx.photo.findMany({
         where: {
           AND: [
-            { latitude: { not: undefined } },
-            { longitude: { not: undefined } },
             { latitude: { not: null } },
             { longitude: { not: null } }
           ]
