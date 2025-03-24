@@ -1,8 +1,14 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import cloudinary from '@/lib/cloudinary';
-import { Readable } from 'stream';
+import cloudinary from 'cloudinary';
+
+// Configure Cloudinary directly in the file as a fallback
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Add interface for Cloudinary result if needed
 interface CloudinaryUploadResult {
@@ -21,13 +27,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // In a real implementation, you would:
-    // 1. Parse the FormData
-    // 2. Get the file from the FormData
-    // 3. Upload it to a storage service
-    // 4. Return the URL
-    
-    // This is a placeholder implementation
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -35,39 +34,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
     
-    // Convert file to buffer
+    // Add debug logging
+    console.log("File received:", file.name, file.type, file.size);
+    console.log("Cloudinary config:", process.env.CLOUDINARY_CLOUD_NAME ? "Cloud name exists" : "Missing cloud name");
+    
+    // Convert file to base64 instead of using streams
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const base64Data = buffer.toString('base64');
+    const dataURI = `data:${file.type};base64,${base64Data}`;
     
-    // Upload to Cloudinary
-    const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+    // Upload to Cloudinary with a simpler approach
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload(
+        dataURI,
         { 
           folder: 'globetrotter',
-          public_id: `photo_${Date.now()}`, 
           resource_type: 'auto' 
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result as CloudinaryUploadResult);
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
         }
       );
-      
-      // Convert buffer to stream and pipe to uploadStream
-      const readableInstance = new Readable({
-        read() {
-          this.push(buffer);
-          this.push(null);
-        }
-      });
-      
-      readableInstance.pipe(uploadStream);
     });
     
-    // Return only the secure_url - REMOVE publicId until database is migrated
+    // Return only the URL (no publicId)
     return NextResponse.json({ 
-      url: result.secure_url,
-      // Don't include public_id until database schema is updated
+      url: uploadResult.secure_url,
       success: true 
     });
   } catch (error) {

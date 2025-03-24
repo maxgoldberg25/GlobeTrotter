@@ -29,30 +29,21 @@ export default function MapPage() {
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    // Fetch photos with location data
-    const fetchPhotos = async () => {
-      try {
-        console.log("Fetching photo locations from API...");
-        const response = await fetch('/api/photos/locations');
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("API error details:", errorData);
-          throw new Error(`API Error (${response.status}): ${errorData.details || errorData.error || 'Unknown error'}`);
-        }
-        
-        const data = await response.json();
-        console.log(`Received ${Array.isArray(data) ? data.length : 0} photos from API`);
-        setPhotos(Array.isArray(data) ? data : []);
+    fetch('/api/photos/locations')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch photos');
+        return res.json();
+      })
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setPhotos(data);
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching photo locations:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load photo locations. Please try again later.');
+      })
+      .catch(error => {
+        console.error("Failed to load photos:", error);
+        setError(error.message);
         setLoading(false);
-      }
-    };
-    
-    fetchPhotos();
+      });
   }, []);
   
   useEffect(() => {
@@ -98,6 +89,19 @@ export default function MapPage() {
     }
   }, [loading, photos.length, error]);
   
+  if (loading) {
+    return <div className="p-4">Loading map data...</div>;
+  }
+
+  if (photos.length === 0) {
+    return (
+      <div className="p-4 text-center">
+        <p>No photos with location data found</p>
+        <p>Upload photos with locations to see them on the map</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="container mx-auto px-6 py-14">
       <div className="mb-6 flex justify-between items-center">
@@ -121,15 +125,9 @@ export default function MapPage() {
         </div>
       )}
       
-      {loading ? (
-        <div className="flex justify-center items-center h-96 bg-gray-100 rounded-lg">
-          <div className="text-gray-600">Loading map...</div>
-        </div>
-      ) : (
-        <div className="h-[calc(100vh-200px)] w-full rounded-lg shadow-md overflow-hidden" style={{ minHeight: '500px' }}>
-          <LeafletMap photos={photos} />
-        </div>
-      )}
+      <div className="h-[calc(100vh-200px)] w-full rounded-lg shadow-md overflow-hidden" style={{ minHeight: '500px' }}>
+        <LeafletMap photos={photos} />
+      </div>
       
       <div className="mt-6 text-gray-600 text-sm">
         <p>Click on a marker to view photo details. Use the controls to zoom and pan around the map.</p>
