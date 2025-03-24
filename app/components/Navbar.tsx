@@ -80,6 +80,8 @@ export default function Navbar() {
     try {
       // Sign out using our enhanced hook
       await handleSignOutAction();
+      // Force a refresh of the page to ensure state is cleared
+      window.location.href = '/';
     } catch (error) {
       console.error("Sign out error:", error);
     } finally {
@@ -141,7 +143,7 @@ export default function Navbar() {
                 Upload Photos
               </Link>
               <Link
-                href="/profile"
+                href="/dashboard"
                 className={`${
                   scrolled || !isHomePage ? "text-gray-700" : "text-white"
                 } hover:text-primary transition-colors font-medium`}
@@ -226,7 +228,7 @@ export default function Navbar() {
                     </p>
                   </div>
                   <Link
-                    href="/profile"
+                    href="/dashboard"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setUserMenuOpen(false)}
                   >
@@ -349,7 +351,7 @@ export default function Navbar() {
                   Upload Photos
                 </Link>
                 <Link
-                  href="/profile"
+                  href="/dashboard"
                   className="text-gray-700 hover:text-primary py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >

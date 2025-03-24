@@ -67,7 +67,6 @@ export async function POST(request: Request) {
     // Return the Cloudinary URL - now TypeScript knows the shape of result
     return NextResponse.json({ 
       url: result.secure_url,
-      public_id: result.public_id,
       success: true 
     });
   } catch (error) {

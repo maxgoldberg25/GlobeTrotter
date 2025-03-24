@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
     
     const body = await request.json();
-    const { title, location, latitude, longitude, imageUrl, publicId } = body;
+    const { title, location, latitude, longitude, imageUrl } = body;
     
     if (!title || !imageUrl) {
       return NextResponse.json({ error: 'Title and image URL are required' }, { status: 400 });
@@ -21,13 +21,12 @@ export async function POST(request: Request) {
     // Create a new photo record
     const photo = await prisma.photo.create({
       data: {
+        userId: session.user.id,
         title,
         imageUrl,
-        publicId,
-        location,
-        latitude,
-        longitude,
-        userId: session.user.id,
+        location: location || null,
+        ...(latitude ? { latitude: parseFloat(latitude) } : {}),
+        ...(longitude ? { longitude: parseFloat(longitude) } : {}),
       },
     });
     

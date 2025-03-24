@@ -93,6 +93,9 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : `${baseUrl}/dashboard`;
+    }
   },
   session: {
     strategy: "jwt",

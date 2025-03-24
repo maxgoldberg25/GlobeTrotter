@@ -1,4 +1,4 @@
-import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -26,16 +26,17 @@ export function useRefreshSession() {
 export function useSignOut() {
   const router = useRouter();
   
-  return useCallback(async () => {
-    // First perform the sign out
-    await nextAuthSignOut({
+  return async () => {
+    // Sign out with force: true to invalidate session across tabs
+    await signOut({ 
       redirect: false,
+      callbackUrl: '/'
     });
     
-    // Then manually navigate to ensure clean state
+    // Force a client-side navigation to home page to clear state
     router.push('/');
-    router.refresh(); // Force a full refresh to ensure clean state
-  }, [router]);
+    router.refresh();
+  };
 }
 
 /**

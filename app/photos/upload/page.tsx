@@ -28,7 +28,6 @@ export default function UploadPhotoPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
-  const [publicId, setPublicId] = useState('');
 
   // Redirect if not authenticated
   if (status === "unauthenticated") {
@@ -135,7 +134,6 @@ export default function UploadPhotoPage() {
             latitude: latitude ? Number(latitude) : null,
             longitude: longitude ? Number(longitude) : null,
             imageUrl: finalImageUrl,
-            publicId: uploadData.public_id,  // Include the publicId from Cloudinary
           };
           
           const response = await fetch("/api/photos", {
