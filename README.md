@@ -214,3 +214,23 @@ This project is set up for continuous deployment. Any changes pushed to the main
 - **Database Hosting**: Neon
 - **CI/CD**: Vercel's GitHub Integration
 - **Environment Variables**: Vercel & .env.local
+
+## Recent Bug Fixes
+
+### Map Location Selection
+
+We've resolved an issue where manually selecting a location on the map wasn't properly recognized during form submission. The fix addresses:
+
+- Correctly handling zero-value coordinates (like longitude 0° at Greenwich)
+- Ensuring manual map selections take precedence over AI detection
+- Preventing the "Please select a location on the map" error when coordinates are already set
+
+### Image Size Optimization
+
+The application now automatically optimizes images to prevent payload size issues:
+
+- Large images are automatically resized before uploading to the server
+- Images for AI location detection are compressed to ensure compatibility with API limits
+- Original image quality is preserved for viewing while optimizing for server requirements
+
+These fixes improve reliability when uploading photos with both manual map selections and AI-detected locations.
