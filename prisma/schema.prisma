@@ -70,6 +70,7 @@ model Photo {
   description String?  @db.Text
   location    String?
   imageUrl    String
+  publicId    String?
   latitude    Float
   longitude   Float
   createdAt   DateTime @default(now())

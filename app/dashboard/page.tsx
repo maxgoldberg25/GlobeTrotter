@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -21,16 +21,22 @@ interface UserProfile {
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchAttempted, setFetchAttempted] = useState(false); // Track if we've attempted to fetch
 
   useEffect(() => {
+    // Only run this once when session is authenticated
     if (status === 'unauthenticated') {
-      window.location.href = '/login?callbackUrl=/dashboard';
+      router.push('/login?callbackUrl=/dashboard');
       return;
     }
 
-    if (status === 'authenticated') {
+    // Only fetch if we haven't already attempted and we have a session
+    if (status === 'authenticated' && session?.user?.id && !fetchAttempted) {
+      setFetchAttempted(true); // Mark that we've attempted the fetch
+      
       // Fetch user data
       fetch('/api/user/profile')
         .then(res => res.json())
@@ -43,7 +49,7 @@ export default function Dashboard() {
           setLoading(false);
         });
     }
-  }, [status]);
+  }, [status, session, router, fetchAttempted]); // Include fetchAttempted in dependencies
 
   if (status === 'loading' || loading) {
     return <div className="container mx-auto p-4">Loading...</div>;

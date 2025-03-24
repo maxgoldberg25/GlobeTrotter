@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useSignOut } from "../lib/auth";
 
@@ -88,6 +88,9 @@ export default function Navbar() {
   };
 
   const isHomePage = pathname === "/";
+  
+  // Check if current path is login or signup to avoid showing these buttons on those pages
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/register';
   
   return (
     <nav
