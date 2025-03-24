@@ -1,56 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import PageContainer from "../components/PageContainer";
 
 export default function Login() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    // Check for message in URL (e.g., from signup)
-    const urlMessage = searchParams?.get("message");
-    if (urlMessage) {
-      setMessage(urlMessage);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+    setIsLoading(true);
+    setError('');
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
       });
 
       if (result?.error) {
-        console.error("Login error:", result.error);
-        setError("Invalid email or password. Please check your credentials and try again.");
-        setLoading(false);
-        return;
+        setError(result.error || 'Failed to sign in');
+        setIsLoading(false);
+      } else {
+        // Force a complete page navigation to ensure auth state is fresh
+        window.location.href = '/dashboard';
       }
-
-      // Redirect to home page on successful login
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Login exception:", error);
-      setError("An error occurred. Please try again later.");
-      setLoading(false);
+    } catch (err) {
+      console.error('Sign in error:', err);
+      setError('An unexpected error occurred');
+      setIsLoading(false);
     }
   };
 
@@ -83,8 +70,8 @@ export default function Login() {
         )}
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            {error}
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+            <p className="text-red-700">{error}</p>
           </div>
         )}
 
@@ -169,12 +156,10 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70"
             >
-              {loading ? (
+              {isLoading ? (
                 <span className="flex items-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

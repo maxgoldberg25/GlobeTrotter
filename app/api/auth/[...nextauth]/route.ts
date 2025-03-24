@@ -75,7 +75,8 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/login",
-    error: "/auth/error",
+    signOut: "/",
+    error: "/login",
   },
   callbacks: {
     async session({ session, token }) {
@@ -94,11 +95,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : `${baseUrl}/dashboard`;
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      } else if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      return baseUrl + "/dashboard";
     }
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
   },
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-build-only',
