@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const dataURI = `data:${file.type};base64,${base64Data}`;
     
     // Upload to Cloudinary with a simpler approach
-    const uploadResult = await new Promise((resolve, reject) => {
+    const uploadResult = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
       cloudinary.v2.uploader.upload(
         dataURI,
         { 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
             console.error("Cloudinary upload error:", error);
             reject(error);
           } else {
-            resolve(result);
+            resolve(result as CloudinaryUploadResult);
           }
         }
       );
