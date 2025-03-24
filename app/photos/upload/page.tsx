@@ -28,6 +28,9 @@ export default function UploadPhotoPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [shouldUseAI, setShouldUseAI] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Redirect if not authenticated
   if (status === "unauthenticated") {
@@ -117,6 +120,77 @@ export default function UploadPhotoPage() {
     }
   };
 
+  const detectLocation = async (imageSource: string, isBase64: boolean = false): Promise<{success: boolean, lat?: number, lng?: number, name?: string}> => {
+    if (!imageSource) return {success: false};
+    
+    setIsDetectingLocation(true);
+    try {
+      console.log('Calling location detection API...');
+      console.log('Image source type:', isBase64 ? 'base64' : 'url');
+      
+      const response = await fetch('/api/locations/detect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          isBase64 
+            ? { imageBase64: imageSource } 
+            : { imageUrl: imageSource }
+        ),
+      });
+
+      console.log('API status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No response body');
+        console.error('API error response:', errorText);
+        throw new Error(`Failed to detect location (${response.status})`);
+      }
+
+      const locationData = await response.json();
+      console.log('Location data received:', locationData);
+      
+      // Check if we have any predictions
+      if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {
+        toast.error('No location could be detected for this image');
+        return {success: false};
+      }
+      
+      // Find the prediction with highest confidence
+      const bestMatch = locationData[0];
+      
+      // CRITICAL FIX: Return values directly AND update state
+      const detectedLat = bestMatch.latitude;
+      const detectedLng = bestMatch.longitude;
+      const detectedName = bestMatch.locationName || 'Detected location';
+      
+      console.log('Setting coordinates:', { lat: detectedLat, lng: detectedLng, name: detectedName });
+      
+      // Update state variables
+      setLatitude(detectedLat);
+      setLongitude(detectedLng);
+      setLocation(detectedName);
+      
+      toast.success('Location detected successfully!');
+      
+      // Return the detected values to the caller
+      return {
+        success: true,
+        lat: detectedLat,
+        lng: detectedLng,
+        name: detectedName
+      };
+    } catch (error) {
+      console.error('Error detecting location:', error);
+      toast.error('Could not detect location automatically');
+      return {success: false};
+    } finally {
+      setIsDetectingLocation(false);
+      setShouldUseAI(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -130,6 +204,14 @@ export default function UploadPhotoPage() {
       return;
     }
 
+    // Check if location is missing
+    const locationMissing = !latitude || !longitude;
+
+    // If location is missing, set flag to use AI
+    if (locationMissing) {
+      setShouldUseAI(true);
+    }
+
     setUploading(true);
     setError(null);
     
@@ -138,37 +220,90 @@ export default function UploadPhotoPage() {
       let finalImageUrl = imageUrl;
       if (imageFile && !imageUrl) {
         finalImageUrl = await handleImageUpload(imageFile);
-        if (!finalImageUrl) return;
+        if (!finalImageUrl) {
+          setUploading(false);
+          return;
+        }
       }
       
-      // Create photo data WITHOUT publicId
+      // If no location coordinates, try AI detection automatically
+      if (locationMissing) {
+        let detectedCoords = null;
+        
+        toast('Attempting to detect location with AI...');
+        
+        if (imageFile) {
+          // For uploads, convert to base64 and detect
+          const reader = new FileReader();
+          detectedCoords = await new Promise<{success: boolean, lat?: number, lng?: number, name?: string}>((resolve) => {
+            reader.onloadend = async () => {
+              const base64 = reader.result as string;
+              const base64Data = base64.split(',')[1];
+              const result = await detectLocation(base64Data, true);
+              resolve(result);
+            };
+            reader.readAsDataURL(imageFile);
+          });
+        } else if (finalImageUrl) {
+          // For image URLs, use the URL
+          detectedCoords = await detectLocation(finalImageUrl);
+        }
+        
+        // If detection failed, inform user and stop
+        if (!detectedCoords?.success) {
+          setUploading(false);
+          setError('Please provide location information manually - AI detection failed');
+          return;
+        }
+        
+        // Use the returned coordinates directly, don't rely on state
+        console.log("Detection successful, using coordinates:", detectedCoords);
+        
+        // Update the state values (redundant but ensures UI is consistent)
+        setLatitude(detectedCoords.lat || null);
+        setLongitude(detectedCoords.lng || null);
+        setLocation(detectedCoords.name || location || '');
+      }
+
+      // Create photo data using the current state
       const photoData = {
         title,
         imageUrl: finalImageUrl,
         location: location || null,
-        latitude: latitude,
-        longitude: longitude,
+        latitude: latitude !== null ? Number(latitude) : null,
+        longitude: longitude !== null ? Number(longitude) : null,
       };
-      
-      // Add validation check
+
+      // Final check to ensure we have coordinates
       if (!photoData.latitude || !photoData.longitude) {
-        toast.error("Please select a location on the map");
+        console.error("Coordinates missing from photoData:", photoData);
+        setError("Please select a location on the map or try AI detection again");
+        setUploading(false);
         return;
       }
-      
+
+      console.log("Submitting photo data:", photoData);
+
+      // Log the exact JSON being sent to help debug
+      const jsonPayload = JSON.stringify(photoData);
+      console.log("JSON payload:", jsonPayload);
+
       const response = await fetch("/api/photos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(photoData),
+        body: jsonPayload,
       });
-      
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to save photo");
+        // More detailed error handling
+        const errorText = await response.text().catch(() => null);
+        console.error("API error:", response.status, errorText);
+        throw new Error(errorText || `Failed to save photo (${response.status})`);
       }
-      
+
+      toast.success('Photo uploaded successfully!');
       setSuccess(true);
       setTimeout(() => {
         router.push("/dashboard");
@@ -177,6 +312,50 @@ export default function UploadPhotoPage() {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (shouldUseAI && preview && !isDetectingLocation) {
+      // If we're using AI and have a preview but no coordinates yet,
+      // we need to detect the location after upload
+      if (!latitude || !longitude) {
+        toast('Will attempt to detect location after upload');
+      }
+    }
+  }, [shouldUseAI, preview, latitude, longitude, isDetectingLocation]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      
+      // Reset location if file changes
+      if (!shouldUseAI) {
+        setLatitude(null);
+        setLongitude(null);
+        setLocation('');
+      }
+    }
+  };
+
+  const getAddressFromCoordinates = async (lat: number, lng: number): Promise<string | null> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch address');
+      }
+      
+      const data = await response.json();
+      return data.display_name || null;
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return null;
     }
   };
 
@@ -275,7 +454,7 @@ export default function UploadPhotoPage() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={handleImageChange}
+                        onChange={handleFileChange}
                         className="hidden"
                         id="photo-upload"
                       />
@@ -334,6 +513,20 @@ export default function UploadPhotoPage() {
                 </div>
               </div>
               
+              {/* Add explanatory text about automatic location detection */}
+              <div className="mt-2 text-sm text-gray-600">
+                <p className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {!latitude && !longitude ? (
+                    <span>Location required - AI will attempt to detect it automatically or you can select it on the map</span>
+                  ) : (
+                    <span>Location selected: {location || `${latitude?.toFixed(6)}, ${longitude?.toFixed(6)}`}</span>
+                  )}
+                </p>
+              </div>
+              
               {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
                   {error}
@@ -345,6 +538,82 @@ export default function UploadPhotoPage() {
                   Photo uploaded successfully! Redirecting...
                 </div>
               )}
+              
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-md">
+                <p className="text-sm text-yellow-800 font-medium mb-1">
+                  Don't know where this photo was taken?
+                </p>
+                <p className="text-xs text-yellow-700">
+                  Our experimental AI can attempt to guess the location based on landmarks and features in your photo. 
+                  Results may vary in accuracy and are not guaranteed to be correct.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!imageFile && !imageUrl) {
+                      toast.error('Please select an image first');
+                      return;
+                    }
+                    
+                    if (imageFile) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        const base64 = reader.result as string;
+                        const base64Data = base64.split(',')[1];
+                        
+                        toast('Analyzing image with AI...');
+                        setIsDetectingLocation(true);
+                        
+                        detectLocation(base64Data, true)
+                          .then(result => {
+                            if (result.success) {
+                              toast.success('Location detected! Check the map to verify.');
+                            } else {
+                              toast.error('Could not identify location from this image.');
+                            }
+                          })
+                          .catch(error => {
+                            console.error("Error during detection:", error);
+                            toast.error('Location detection failed');
+                          });
+                      };
+                      reader.readAsDataURL(imageFile);
+                    } else if (imageUrl) {
+                      toast('Analyzing image with AI...');
+                      setIsDetectingLocation(true);
+                      
+                      detectLocation(imageUrl)
+                        .then(result => {
+                          if (result.success) {
+                            toast.success('Location detected! Check the map to verify.');
+                          } else {
+                            toast.error('Could not identify location from this image.');
+                          }
+                        })
+                        .catch(error => {
+                          console.error("Error during detection:", error);
+                          toast.error('Location detection failed');
+                        });
+                    }
+                  }}
+                  disabled={isDetectingLocation || (!imageFile && !imageUrl)}
+                  className="mt-3 w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-md hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {isDetectingLocation ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      <span>AI Analyzing Image...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H9.834V9.593l1.553 1.553a.75.75 0 001.06-1.06l-3-3a.75.75 0 00-1.06 0l-3 3a.75.75 0 001.06 1.06l1.553-1.553V13h-1z" />
+                      </svg>
+                      <span>Use AI to Detect Location</span>
+                    </>
+                  )}
+                </button>
+              </div>
               
               <div className="mt-8 flex justify-end">
                 <Link

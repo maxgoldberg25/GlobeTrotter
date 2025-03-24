@@ -61,7 +61,9 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-6 py-14">
-      <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-2">
+        Welcome, {userProfile?.name || 'User'}
+      </h1>
       
       <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
         <div className="p-8">
@@ -90,17 +92,23 @@ export default function Dashboard() {
               
               <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4 mb-4">
                 <Link href="/photos" className="text-center hover:bg-gray-100 p-3 rounded-lg transition">
-                  <span className="block text-3xl font-bold text-blue-600">{userProfile._count.photos}</span>
+                  <span className="block text-3xl font-bold text-blue-600">
+                    {userProfile?._count?.photos || 0}
+                  </span>
                   <span className="text-gray-600">Photos</span>
                 </Link>
                 
                 <Link href={`/dashboard/followers`} className="text-center hover:bg-gray-100 p-3 rounded-lg transition">
-                  <span className="block text-3xl font-bold text-blue-600">{userProfile._count.followers}</span>
+                  <span className="block text-3xl font-bold text-blue-600">
+                    {userProfile?._count?.followers || 0}
+                  </span>
                   <span className="text-gray-600">Followers</span>
                 </Link>
                 
                 <Link href={`/dashboard/following`} className="text-center hover:bg-gray-100 p-3 rounded-lg transition">
-                  <span className="block text-3xl font-bold text-blue-600">{userProfile._count.following}</span>
+                  <span className="block text-3xl font-bold text-blue-600">
+                    {userProfile?._count?.following || 0}
+                  </span>
                   <span className="text-gray-600">Following</span>
                 </Link>
               </div>

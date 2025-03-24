@@ -6,51 +6,73 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, imageUrl, location, latitude, longitude } = await request.json();
-
+    console.log("Session user info:", session.user);
+    
+    const data = await request.json();
+    console.log("API received data:", data);
+    
     // Validate required fields
-    if (!title || !imageUrl) {
+    if (!data.title || !data.imageUrl) {
       return NextResponse.json(
         { error: 'Title and image URL are required' },
         { status: 400 }
       );
     }
 
-    console.log('Creating photo with coordinates:', {
-      latitude: typeof latitude === 'string' ? parseFloat(latitude) : latitude,
-      longitude: typeof longitude === 'string' ? parseFloat(longitude) : longitude
-    });
-
-    // Create photo with proper type handling for coordinates
-    const photo = await prisma.photo.create({
-      data: {
-        userId: session.user.id,
-        title,
-        imageUrl,
-        location: location || null,
-        // Proper type handling for latitude/longitude
-        latitude: latitude ? 
-          (typeof latitude === 'string' ? parseFloat(latitude) : latitude) : 
-          null,
-        longitude: longitude ? 
-          (typeof longitude === 'string' ? parseFloat(longitude) : longitude) : 
-          null,
+    // First check if the user exists
+    let user = await prisma.user.findUnique({
+      where: {
+        email: session.user.email,
       },
     });
 
-    console.log('Created photo:', photo);
+    // If user not found, try to create them
+    if (!user) {
+      console.log(`User not found with email: ${session.user.email}. Attempting to create.`);
+      try {
+        user = await prisma.user.create({
+          data: {
+            email: session.user.email,
+            name: session.user.name || 'User',
+            // Add any other required fields with default values
+          },
+        });
+        console.log("Created new user:", user.id);
+      } catch (createError) {
+        console.error("Failed to create user:", createError);
+        return NextResponse.json(
+          { error: 'Authentication error. Please log out and sign in again.' },
+          { status: 401 }
+        );
+      }
+    }
+
+    // Create photo with direct userId
+    const photoData = {
+      title: data.title,
+      imageUrl: data.imageUrl,
+      location: data.location || null,
+      latitude: data.latitude ? Number(data.latitude) : null,
+      longitude: data.longitude ? Number(data.longitude) : null,
+      userId: user.id,
+    };
+
+    console.log("Creating photo with data:", photoData);
+
+    // Create photo
+    const photo = await prisma.photo.create({
+      data: photoData,
+    });
+
     return NextResponse.json(photo);
   } catch (error) {
     console.error('Error creating photo:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to create photo',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Failed to create photo', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

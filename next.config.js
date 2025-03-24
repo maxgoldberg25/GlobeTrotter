@@ -5,6 +5,7 @@ const nextConfig = {
     domains: ['example.com', 'yourdomain.com', 'placehold.it', 'res.cloudinary.com'],
   },
   experimental: {
+    appDir: true,
     serverActions: true,
   },
   webpack: (config, { isServer }) => {
