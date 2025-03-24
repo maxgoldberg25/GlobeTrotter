@@ -6,47 +6,51 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await request.json();
-    
-    // Add validation for coordinates
-    if (typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
+    const { title, imageUrl, location, latitude, longitude } = await request.json();
+
+    // Validate required fields
+    if (!title || !imageUrl) {
       return NextResponse.json(
-        { error: 'Invalid coordinates format' },
+        { error: 'Title and image URL are required' },
         { status: 400 }
       );
     }
 
-    // Create the photo with explicit type casting
+    console.log('Creating photo with coordinates:', {
+      latitude: typeof latitude === 'string' ? parseFloat(latitude) : latitude,
+      longitude: typeof longitude === 'string' ? parseFloat(longitude) : longitude
+    });
+
+    // Create photo with proper type handling for coordinates
     const photo = await prisma.photo.create({
       data: {
-        title: data.title,
-        imageUrl: data.imageUrl,
-        latitude: Number(data.latitude),
-        longitude: Number(data.longitude),
-        location: data.location,
-        user: {
-          connect: {
-            email: session.user.email,
-          },
-        },
+        userId: session.user.id,
+        title,
+        imageUrl,
+        location: location || null,
+        // Proper type handling for latitude/longitude
+        latitude: latitude ? 
+          (typeof latitude === 'string' ? parseFloat(latitude) : latitude) : 
+          null,
+        longitude: longitude ? 
+          (typeof longitude === 'string' ? parseFloat(longitude) : longitude) : 
+          null,
       },
     });
 
-    // Return the complete photo data including coordinates
-    return NextResponse.json({
-      ...photo,
-      latitude: Number(photo.latitude),
-      longitude: Number(photo.longitude)
-    });
-
+    console.log('Created photo:', photo);
+    return NextResponse.json(photo);
   } catch (error) {
     console.error('Error creating photo:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Failed to create photo',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
