@@ -1,6 +1,71 @@
 # GlobeTrotter
 
-A social platform for travelers to share their journey with the world. Upload photos, geotag them on an interactive map, and connect with fellow travelers.
+GlobeTrotter is a social platform for travelers to share their photos and experiences from around the world. Users can upload photos with location data, view them on an interactive map, and connect with other travelers.
+
+## Features
+
+- **User Authentication**: Secure login and registration system
+- **Photo Upload**: Share your travel photos with titles, descriptions, and location data
+- **Interactive Map**: View all shared photos on a global map with location markers
+- **Profile Management**: Customize your profile and view other users' galleries
+- **Location Tracking**: Automatically capture or manually set photo locations
+- **Social Features**: Follow other travelers and interact with their content
+
+## Technologies Used
+
+- **Frontend**: Next.js 13, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Database**: PostgreSQL (via Neon)
+- **Authentication**: NextAuth.js
+- **Map Integration**: Leaflet with React-Leaflet
+- **Image Storage**: Cloudinary
+- **Deployment**: Vercel
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/globetrotter.git
+cd globetrotter
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+Create a `.env.local` file with:
+```env
+DATABASE_URL="your_neon_db_url"
+NEXTAUTH_SECRET="your_secret"
+NEXTAUTH_URL="http://localhost:3000"
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+CLOUDINARY_API_KEY="your_api_key"
+CLOUDINARY_API_SECRET="your_api_secret"
+```
+
+4. Run database migrations:
+```bash
+npx prisma migrate dev
+```
+
+5. Start the development server:
+```bash
+npm run dev
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Live Demo
 
@@ -39,42 +104,6 @@ This project uses [Neon](https://neon.tech) for the PostgreSQL database, integra
   npx prisma studio
   ```
   This opens a GUI at http://localhost:5555
-
-## Getting Started
-
-First, install the dependencies:
-
-```bash
-npm install
-```
-
-Then, run the development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### Environment Variables
-
-Required environment variables:
-```env
-# Database Configuration
-DATABASE_URL=postgresql://user:password@hostname/database
-PGHOST=hostname
-PGUSER=user
-PGPASSWORD=password
-PGDATABASE=database
-
-# Email Configuration
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-
-# Auth Configuration
-NEXTAUTH_URL=your_production_url
-NEXTAUTH_SECRET=your_secret
-```
 
 ### Email Functionality
 
@@ -147,16 +176,3 @@ This project is set up for continuous deployment. Any changes pushed to the main
 8. ⬜ Social connectivity
 9. ⬜ Notifications
 10. ⬜ Mobile optimization
-
-## Technologies Used
-
-- Next.js (version 13.4.19)
-- TypeScript
-- Tailwind CSS
-- React
-- Leaflet (for interactive maps)
-- Prisma (ORM)
-- NextAuth.js (authentication)
-- Nodemailer (email functionality)
-- Vercel (hosting platform)
-- Neon (PostgreSQL database)
