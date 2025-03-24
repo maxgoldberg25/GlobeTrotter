@@ -10,10 +10,9 @@ import FollowButton from "@/app/components/FollowButton";
 // Add a type definition for follower
 interface Follower {
   id: string;
-  name: string;
-  email: string;
-  image?: string;
-  // Add other properties your user object has
+  name: string | null;
+  email: string | null;
+  image: string | null;
 }
 
 export default function MyFollowersPage() {
@@ -22,6 +21,7 @@ export default function MyFollowersPage() {
   const router = useRouter();
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -31,13 +31,22 @@ export default function MyFollowersPage() {
     
     if (status === 'authenticated' && session?.user?.id) {
       fetch(`/api/user/followers`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Server responded with ${res.status}`);
+          }
+          return res.json();
+        })
         .then(data => {
-          setFollowers(data);
+          // Ensure data is an array
+          const followersArray = Array.isArray(data) ? data : [];
+          setFollowers(followersArray);
           setLoading(false);
         })
         .catch(error => {
           console.error('Error fetching followers:', error);
+          setError('Failed to load followers. Please try again later.');
+          setFollowers([]); // Set empty array to prevent mapping errors
           setLoading(false);
         });
     }
@@ -60,7 +69,11 @@ export default function MyFollowersPage() {
       
       <h1 className="text-2xl font-bold mb-8">Your Followers</h1>
       
-      {followers.length === 0 ? (
+      {error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+          {error}
+        </div>
+      ) : followers.length === 0 ? (
         <div className="bg-white shadow-md rounded-lg p-8">
           <p className="text-gray-600">You don't have any followers yet.</p>
         </div>
@@ -86,8 +99,8 @@ export default function MyFollowersPage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-medium">{follower.name}</h3>
-                      <p className="text-sm text-gray-500">{follower.email}</p>
+                      <h3 className="font-medium">{follower.name || 'Unnamed User'}</h3>
+                      <p className="text-sm text-gray-500">{follower.email || 'No email'}</p>
                     </div>
                   </div>
                   <FollowButton userId={follower.id} isFollowing={false} />

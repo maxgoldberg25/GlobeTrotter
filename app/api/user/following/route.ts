@@ -11,27 +11,27 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const followers = await prisma.follow.findMany({
+    const following = await prisma.follow.findMany({
       where: {
-        followingId: session.user.id,
+        followerId: session.user.id,
       },
       include: {
-        follower: true,
+        following: true,
       },
     });
 
     // Format the response to return an array of user objects
-    const formattedFollowers = followers.map(follow => ({
-      id: follow.follower.id,
-      name: follow.follower.name,
-      email: follow.follower.email,
-      image: follow.follower.image
+    const formattedFollowing = following.map(follow => ({
+      id: follow.following.id,
+      name: follow.following.name,
+      email: follow.following.email,
+      image: follow.following.image
     }));
 
-    // Return an empty array if no followers
-    return NextResponse.json(formattedFollowers);
+    // Return an empty array if not following anyone
+    return NextResponse.json(formattedFollowing);
   } catch (error) {
-    console.error('Error fetching followers:', error);
+    console.error('Error fetching following:', error);
     // Return an empty array instead of an error to prevent frontend errors
     return NextResponse.json([], { status: 200 });
   }
