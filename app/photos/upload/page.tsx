@@ -127,7 +127,7 @@ export default function UploadPhotoPage() {
       console.log('Calling location detection API...');
       console.log('Image source type:', isBase64 ? 'base64' : 'url');
       
-      const response = await fetch('/api/locations/detect', {
+      const response = await fetch('/api/location-detect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
