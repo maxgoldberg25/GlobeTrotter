@@ -1,7 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import { detectImageLocation } from '@/lib/picarta';
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +12,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { imageUrl, imageBase64 } = body;
     const imageSource = imageBase64 || imageUrl;
-    
+
     if (!imageSource) {
       return NextResponse.json(
         { error: 'Image source (URL or base64) is required' },
@@ -23,29 +22,63 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.PICARTA_API_KEY;
     if (!apiKey) {
-      console.error('Picarta API key not found in environment variables');
+      console.error('Picarta API key missing');
       return NextResponse.json(
         { error: 'API configuration error' },
         { status: 500 }
       );
     }
 
-    console.log('Calling Picarta AI detection service...');
-    const locationData = await detectImageLocation(imageSource, apiKey);
-    
-    if (!locationData || locationData.length === 0) {
+    // Prepare payload according to Picarta's requirements
+    const payload = {
+      TOKEN: apiKey,
+      IMAGE: imageBase64 ? imageBase64.split(',')[1] : imageUrl, // Remove base64 prefix if present
+      TOP_K: 3,
+      Center_LATITUDE: null,
+      Center_LONGITUDE: null,
+      RADIUS: null
+    };
+
+    const response = await fetch("https://picarta.ai/classify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Picarta API error:', errorText);
       return NextResponse.json(
-        { error: 'Could not detect location' },
+        { error: `Picarta API error: ${errorText}` },
+        { status: response.status }
+      );
+    }
+
+    const result = await response.json();
+    
+    if (!result?.predictions || result.predictions.length === 0) {
+      return NextResponse.json(
+        { error: "No location predictions found" },
         { status: 404 }
       );
     }
 
-    console.log('Picarta detection successful, returning data');
-    return NextResponse.json(locationData);
+    // Map Picarta's response to our format
+    const locations = result.predictions.map((pred: any) => ({
+      latitude: pred.latitude,
+      longitude: pred.longitude,
+      confidence: pred.probability,
+      locationName: pred.place
+    }));
+
+    return NextResponse.json(locations);
+
   } catch (error) {
-    console.error('Error in location detection API:', error);
+    console.error('Location detection error:', error);
     return NextResponse.json(
-      { error: 'Failed to detect location', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
