@@ -7,21 +7,12 @@ export async function GET() {
   try {
     console.log("Starting photo location fetch...");
     
-    const photos = await prisma.photo.findMany({
-      where: {
-        AND: [
-          {
-            latitude: {
-              not: null,
-            },
-          },
-          {
-            longitude: {
-              not: null,
-            },
-          },
-        ],
-      },
+    // First, let's count all photos
+    const totalPhotos = await prisma.photo.count();
+    console.log("Total photos in database:", totalPhotos);
+    
+    // Simplified query to check all photos with their coordinates
+    const allPhotosWithCoords = await prisma.photo.findMany({
       select: {
         id: true,
         title: true,
@@ -29,23 +20,47 @@ export async function GET() {
         latitude: true,
         longitude: true,
         location: true,
+        createdAt: true,
         user: {
           select: {
+            id: true,
             name: true,
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
-    console.log(`Found ${photos.length} photos with location data`);
-    
-    if (photos.length === 0) {
-      console.log("No photos found with location data");
-    } else {
-      console.log("Sample photo data:", JSON.stringify(photos[0], null, 2));
-    }
+    console.log("All photos with their coordinates:", 
+      allPhotosWithCoords.map(p => ({
+        id: p.id,
+        title: p.title,
+        lat: p.latitude,
+        lng: p.longitude,
+        createdAt: p.createdAt
+      }))
+    );
 
-    return NextResponse.json(photos);
+    // Filter photos with coordinates in JavaScript to debug
+    const validPhotos = allPhotosWithCoords.filter(p => 
+      p.latitude !== null && 
+      p.longitude !== null &&
+      !isNaN(Number(p.latitude)) && 
+      !isNaN(Number(p.longitude))
+    );
+
+    console.log("Valid photos after filtering:", 
+      validPhotos.map(p => ({
+        id: p.id,
+        title: p.title,
+        lat: p.latitude,
+        lng: p.longitude
+      }))
+    );
+
+    return NextResponse.json(validPhotos);
   } catch (error) {
     console.error("Error in photos/locations API:", error);
     return NextResponse.json(
