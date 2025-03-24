@@ -140,35 +140,6 @@ To set up the admin user:
    - Password: `Password`
 4. Access the admin dashboard at [http://localhost:3000/admin](http://localhost:3000/admin)
 
-## Deployment on Vercel
-
-The project is configured for deployment on Vercel with Neon PostgreSQL integration.
-
-### Prerequisites
-
-1. A [Vercel](https://vercel.com) account
-2. A [Neon](https://neon.tech) account for the PostgreSQL database
-
-### Steps to Deploy
-
-1. **Fork or clone this repository** to your GitHub account
-
-2. **Connect your repository to Vercel**:
-   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
-   - Click "Add New" > "Project"
-   - Select your repository and click "Import"
-
-3. **Set up Neon Integration**:
-   - In Vercel, go to Storage
-   - Add Neon integration
-   - Connect to your project
-
-4. **Configure Environment Variables**:
-   Vercel will automatically set up database variables. Add the remaining variables:
-   - `NEXTAUTH_URL`: Your production URL (e.g., `https://your-app.vercel.app`)
-   - `NEXTAUTH_SECRET`: A secure random string (generate with `openssl rand -base64 32`)
-   - `EMAIL_USER`: Your email address for the contact form
-   - `EMAIL_PASSWORD`: Your email app password
 
 ### Continuous Deployment
 
