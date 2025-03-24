@@ -125,6 +125,51 @@ export default function UploadPhotoPage() {
     }
   };
 
+  // Add this image resize function
+  const resizeImageForAI = async (base64Image: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        // Target dimensions - 800px max width/height while maintaining aspect ratio
+        const MAX_SIZE = 800;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height && width > MAX_SIZE) {
+          height = Math.round((height * MAX_SIZE) / width);
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width = Math.round((width * MAX_SIZE) / height);
+          height = MAX_SIZE;
+        }
+        
+        // Create canvas and resize
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw resized image
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Get resized base64 (0.8 quality JPEG)
+        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        console.log(`Image resized from ${base64Image.length} to ${resizedBase64.length} bytes`);
+        
+        resolve(resizedBase64);
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image for resizing'));
+      img.src = base64Image;
+    });
+  };
+
+  // Update the detectLocation function
   const detectLocation = async (imageSource: string, isBase64: boolean = false): Promise<{success: boolean, lat?: number, lng?: number, name?: string}> => {
     console.groupCollapsed('Location Detection Debug');
     try {
@@ -134,28 +179,24 @@ export default function UploadPhotoPage() {
         imageSource.substring(0, 100) + '...' : 
         imageSource
       );
-
-      // Add before the fetch call
-      console.log('Request payload:', {
-        body: JSON.stringify(
-          isBase64 
-            ? { imageBase64: imageSource } 
-            : { imageUrl: imageSource }
-        ),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
+      
+      // Resize large base64 images before sending to API
+      let processedImageSource = imageSource;
       if (isBase64) {
-        const [header, data] = imageSource.split(',');
-        console.log('Base64 validation:', {
-          headerValid: header.startsWith('data:image/'),
-          dataLength: data?.length,
-          encodingValid: /^[A-Za-z0-9+/]+={0,2}$/.test(data)
-        });
+        // If image is larger than 1MB, resize it
+        if (imageSource.length > 1024 * 1024) {
+          toast.info('Optimizing image for AI processing...');
+          try {
+            processedImageSource = await resizeImageForAI(imageSource);
+            console.log('Image was resized for API submission');
+          } catch (error) {
+            console.error('Image resize error:', error);
+            // Continue with original if resize fails
+          }
+        }
       }
 
+      // Rest of function with processedImageSource instead of imageSource
       const response = await fetch('/api/locations/detect', {
         method: 'POST',
         headers: {
@@ -163,8 +204,8 @@ export default function UploadPhotoPage() {
         },
         body: JSON.stringify(
           isBase64 
-            ? { imageBase64: imageSource } 
-            : { imageUrl: imageSource }
+            ? { imageBase64: processedImageSource } 
+            : { imageUrl: processedImageSource }
         ),
       });
 
@@ -489,12 +530,12 @@ export default function UploadPhotoPage() {
                   
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Photo*
+                      Photo* <span className="text-xs text-red-600 ml-1">(JPEG format required)</span>
                     </label>
                     <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/jpg"
                         onChange={handleFileChange}
                         className="hidden"
                         id="photo-upload"
@@ -506,6 +547,7 @@ export default function UploadPhotoPage() {
                         Select Image
                       </label>
                       <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
+                      <p className="text-xs text-amber-600 mt-1">Only JPEG images are supported for AI location detection</p>
                     </div>
                     
                     <div className="mt-4">

@@ -21,33 +21,27 @@ GlobeTrotter is a social platform for travelers to share their photos and experi
 - **Image Storage**: Cloudinary
 - **Deployment**: Vercel
 
-## AI Location Detection
+## AI Location Detection Feature
 
-GlobeTrotter now features experimental AI-powered location detection for photos. This feature helps users identify where their photos were taken when they're unsure of the location.
+The application now includes an experimental AI-powered location detection feature using the Picarta API. This feature can automatically analyze photos and suggest potential location coordinates based on landmarks and visual features in the image.
 
-### How It Works
+### Requirements
 
-1. **Upload a Photo**: In the photo upload form, select an image from your device
-2. **AI Detection**: If you don't know where the photo was taken, click "Use AI to Detect Location"
-3. **Review Results**: The AI will analyze landmarks and visual features to guess the location
-4. **Verify on Map**: Once detected, the location will be displayed on the map for confirmation
-5. **Edit if Needed**: You can still manually adjust the location if the AI prediction isn't accurate
+- **Image Format**: Only JPEG images are supported for AI location detection
+- **API Key**: Requires a valid Picarta API key set in the environment variables
+- **Image Quality**: Best results achieved with clear, outdoor photos containing recognizable landmarks
 
-### Technical Implementation
+### How to Use
 
-- Powered by Picarta AI's image recognition technology
-- Uses landmark recognition and geographical feature analysis
-- Results include latitude, longitude, and location name when available
-- The experimental feature has varying accuracy depending on recognizable landmarks
+1. Upload a JPEG image or provide an image URL in the photo upload form
+2. Click the "Use AI to Detect Location" button in the yellow information box
+3. The AI will analyze the image and attempt to determine the location
+4. If successful, the map will automatically update with the detected coordinates
+5. You can verify and adjust the detected location on the map if needed
 
-### Privacy Note
+### Environment Setup
 
-- All image processing is done securely
-- Photos are not stored by the AI service
-- Users retain full control over which photos to analyze
-- Location data is only saved when the user confirms the upload
-
-> **Note**: This is an experimental feature and may not accurately identify all locations. Results work best for photos with recognizable landmarks or distinctive geographical features.
+To use this feature, you must set the following environment variable:
 
 ## Live Demo
 
