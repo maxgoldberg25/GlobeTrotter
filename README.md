@@ -21,12 +21,37 @@ GlobeTrotter is a social platform for travelers to share their photos and experi
 - **Image Storage**: Cloudinary
 - **Deployment**: Vercel
 
+## AI Location Detection
 
+GlobeTrotter now features experimental AI-powered location detection for photos. This feature helps users identify where their photos were taken when they're unsure of the location.
+
+### How It Works
+
+1. **Upload a Photo**: In the photo upload form, select an image from your device
+2. **AI Detection**: If you don't know where the photo was taken, click "Use AI to Detect Location"
+3. **Review Results**: The AI will analyze landmarks and visual features to guess the location
+4. **Verify on Map**: Once detected, the location will be displayed on the map for confirmation
+5. **Edit if Needed**: You can still manually adjust the location if the AI prediction isn't accurate
+
+### Technical Implementation
+
+- Powered by Picarta AI's image recognition technology
+- Uses landmark recognition and geographical feature analysis
+- Results include latitude, longitude, and location name when available
+- The experimental feature has varying accuracy depending on recognizable landmarks
+
+### Privacy Note
+
+- All image processing is done securely
+- Photos are not stored by the AI service
+- Users retain full control over which photos to analyze
+- Location data is only saved when the user confirms the upload
+
+> **Note**: This is an experimental feature and may not accurately identify all locations. Results work best for photos with recognizable landmarks or distinctive geographical features.
 
 ## Live Demo
 
 🌎 **Try GlobeTrotter**: [https://globe-trotter-sable.vercel.app/](https://globe-trotter-sable.vercel.app/)
-
 
 Experience the live application and explore features like:
 - Interactive world map with photo locations
@@ -142,7 +167,6 @@ To set up the admin user:
    - Email: `test@gmail.com` 
    - Password: `Password`
 4. Access the admin dashboard at [http://localhost:3000/admin](http://localhost:3000/admin)
-
 
 ### Continuous Deployment
 
