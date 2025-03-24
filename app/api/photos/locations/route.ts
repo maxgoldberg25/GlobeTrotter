@@ -5,23 +5,22 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    console.log("Fetching photos with location data...");
+    console.log("Starting photo location fetch...");
     
-    // Modify the Prisma query to not include publicId
     const photos = await prisma.photo.findMany({
       where: {
         AND: [
           {
             latitude: {
-              not: null
-            }
+              not: null,
+            },
           },
           {
             longitude: {
-              not: null
-            }
-          }
-        ]
+              not: null,
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -30,10 +29,8 @@ export async function GET() {
         latitude: true,
         longitude: true,
         location: true,
-        createdAt: true,
         user: {
           select: {
-            id: true,
             name: true,
           },
         },
@@ -41,11 +38,21 @@ export async function GET() {
     });
 
     console.log(`Found ${photos.length} photos with location data`);
+    
+    if (photos.length === 0) {
+      console.log("No photos found with location data");
+    } else {
+      console.log("Sample photo data:", JSON.stringify(photos[0], null, 2));
+    }
+
     return NextResponse.json(photos);
   } catch (error) {
-    console.error("Error fetching photo locations:", error);
+    console.error("Error in photos/locations API:", error);
     return NextResponse.json(
-      { error: "Failed to fetch photo locations", details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: "Failed to fetch photo locations", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      },
       { status: 500 }
     );
   }

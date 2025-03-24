@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
@@ -12,96 +13,59 @@ const LeafletMap = dynamic(
 );
 
 interface Photo {
-  id: string | number;
+  id: string;
   title: string;
   imageUrl: string;
-  location: string;
   latitude: number;
   longitude: number;
-  userId: string;
-  userName?: string;
+  location: string;
+  user: {
+    name: string;
+  };
 }
 
 export default function MapPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
+    console.log('Fetching photo locations from API...');
     fetch('/api/photos/locations')
       .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch photos');
+        console.log('API Response status:', res.status);
+        if (!res.ok) throw new Error(`API returned status ${res.status}`);
         return res.json();
       })
       .then(data => {
-        if (data.error) throw new Error(data.error);
-        setPhotos(data);
+        console.log('Received photos data:', data);
+        if (Array.isArray(data)) {
+          setPhotos(data);
+        } else {
+          console.error('Unexpected data format:', data);
+          setError('Invalid data format received');
+        }
         setLoading(false);
       })
-      .catch(error => {
-        console.error("Failed to load photos:", error);
-        setError(error.message);
+      .catch(err => {
+        console.error('Error loading photos:', err);
+        setError(err.message);
         setLoading(false);
       });
   }, []);
-  
-  useEffect(() => {
-    // If no photos were found and we're not loading anymore, use mock data
-    if (!loading && photos.length === 0 && !error) {
-      console.log("No photos found, using mock data");
-      
-      // Mock data for testing the map
-      const mockPhotos = [
-        {
-          id: 1,
-          title: "Golden Gate Bridge",
-          imageUrl: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29",
-          location: "San Francisco, CA",
-          latitude: 37.8199,
-          longitude: -122.4783,
-          userId: "1",
-          userName: "Test User"
-        },
-        {
-          id: 2,
-          title: "Statue of Liberty",
-          imageUrl: "https://images.unsplash.com/photo-1605130284535-11dd9eedc58a",
-          location: "New York, NY",
-          latitude: 40.6892,
-          longitude: -74.0445,
-          userId: "1",
-          userName: "Test User"
-        },
-        {
-          id: 3,
-          title: "Eiffel Tower",
-          imageUrl: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f",
-          location: "Paris, France",
-          latitude: 48.8584,
-          longitude: 2.2945,
-          userId: "1",
-          userName: "Test User"
-        }
-      ];
-      
-      setPhotos(mockPhotos);
-    }
-  }, [loading, photos.length, error]);
-  
+
   if (loading) {
     return <div className="p-4">Loading map data...</div>;
   }
 
-  if (photos.length === 0) {
-    return (
-      <div className="p-4 text-center">
-        <p>No photos with location data found</p>
-        <p>Upload photos with locations to see them on the map</p>
-      </div>
-    );
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
   }
-  
+
+  if (!photos.length) {
+    return <div className="p-4">No photos with location data available.</div>;
+  }
+
   return (
     <div className="container mx-auto px-6 py-14">
       <div className="mb-6 flex justify-between items-center">
@@ -119,14 +83,36 @@ export default function MapPage() {
       
       <h1 className="text-2xl font-bold mb-8">Explore Photos on the Map</h1>
       
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
-          {error}
-        </div>
-      )}
-      
-      <div className="h-[calc(100vh-200px)] w-full rounded-lg shadow-md overflow-hidden" style={{ minHeight: '500px' }}>
-        <LeafletMap photos={photos} />
+      <div className="h-screen w-full pt-16">
+        <MapContainer
+          center={[photos[0].latitude, photos[0].longitude]}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {photos.map(photo => (
+            <Marker
+              key={photo.id}
+              position={[photo.latitude, photo.longitude]}
+            >
+              <Popup>
+                <div className="max-w-xs">
+                  <img 
+                    src={photo.imageUrl} 
+                    alt={photo.title}
+                    className="w-full h-32 object-cover mb-2"
+                  />
+                  <h3 className="font-bold">{photo.title}</h3>
+                  <p className="text-sm">{photo.location}</p>
+                  <p className="text-xs text-gray-500">By {photo.user.name}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
       </div>
       
       <div className="mt-6 text-gray-600 text-sm">

@@ -46,4 +46,40 @@ export async function DELETE(
       { status: 500 }
     );
   }
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const photo = await prisma.photo.findUnique({
+      where: {
+        id: params.id
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            image: true
+          }
+        }
+      }
+    });
+
+    if (!photo) {
+      return NextResponse.json(
+        { error: 'Photo not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(photo);
+  } catch (error) {
+    console.error('Error fetching photo:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch photo' },
+      { status: 500 }
+    );
+  }
 } 

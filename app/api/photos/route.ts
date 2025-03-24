@@ -4,29 +4,31 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    const { title, imageUrl, location, latitude, longitude } = await request.json();
-    
-    // Validate required fields
-    if (!title || !imageUrl) {
-      return NextResponse.json({ error: 'Title and image URL are required' }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Create photo WITHOUT attempting to save publicId
+    const { title, imageUrl, location, latitude, longitude } = await request.json();
+
+    // Validate required fields
+    if (!title || !imageUrl) {
+      return NextResponse.json(
+        { error: 'Title and image URL are required' },
+        { status: 400 }
+      );
+    }
+
+    // Create photo without publicId
     const photo = await prisma.photo.create({
       data: {
         userId: session.user.id,
         title,
         imageUrl,
         location: location || null,
-        latitude: latitude || null,
-        longitude: longitude || null,
-        // DO NOT include publicId here
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
       },
     });
 
@@ -34,7 +36,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating photo:', error);
     return NextResponse.json(
-      { error: 'Failed to create photo', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Failed to create photo',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        // Add stack trace only in development
+        ...(process.env.NODE_ENV === 'development' && { stack: error instanceof Error ? error.stack : undefined })
+      },
       { status: 500 }
     );
   }

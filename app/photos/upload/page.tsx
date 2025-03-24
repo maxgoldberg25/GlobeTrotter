@@ -144,12 +144,17 @@ export default function UploadPhotoPage() {
       // Create photo data WITHOUT publicId
       const photoData = {
         title,
-        location,
+        imageUrl: finalImageUrl,
+        location: location || null,
         latitude: latitude ? Number(latitude) : null,
         longitude: longitude ? Number(longitude) : null,
-        imageUrl: finalImageUrl,
-        // Don't include publicId
       };
+      
+      // Add validation check
+      if (!latitude || !longitude) {
+        toast.error("Please select a location on the map");
+        return;
+      }
       
       const response = await fetch("/api/photos", {
         method: "POST",
