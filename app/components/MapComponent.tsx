@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -22,38 +22,52 @@ export default function MapComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
     try {
-      const response = await fetch('/api/photos/locations', {
+      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      const response = await fetch(`/api/photos/locations?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
-      if (!response.ok) throw new Error('Failed to fetch photos');
+      if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+      }
       
       const data = await response.json();
       console.log('Fetched photos:', data);
+      
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format received');
+      }
+
       setPhotos(data);
+      setError(null);
     } catch (error) {
       console.error('Error fetching photos:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch photos');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchPhotos();
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchPhotos, 30000);
-    
-    return () => clearInterval(interval);
   }, []);
 
+  // Initial fetch
   useEffect(() => {
-    // Fix Leaflet icon issue
+    fetchPhotos();
+  }, [fetchPhotos]);
+
+  // Set up polling for updates
+  useEffect(() => {
+    const interval = setInterval(fetchPhotos, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
+  }, [fetchPhotos]);
+
+  // Leaflet icon fix
+  useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: '/images/marker-icon-2x.png',
