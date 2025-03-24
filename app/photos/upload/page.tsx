@@ -92,31 +92,30 @@ export default function UploadPhotoPage() {
 
   const handleImageUpload = async (file: File) => {
     try {
-      setUploading(true);
       const formData = new FormData();
       formData.append('file', file);
-
+      
+      console.log('Uploading file:', file.name, file.type, file.size);
+      
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-
-      const data = await response.json();
-      setImageUrl(data.url);
-      // Don't set publicId until database is updated
-      // setPublicId(data.public_id);
       
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Upload failed:', data);
+        toast.error(`Upload failed: ${data.details || data.error || 'Unknown error'}`);
+        return null;
+      }
+      
+      console.log('Upload successful:', data);
       return data.url;
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
+      toast.error('Failed to upload image. Please try again.');
       return null;
-    } finally {
-      setUploading(false);
     }
   };
 
