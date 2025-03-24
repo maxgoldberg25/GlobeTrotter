@@ -1,28 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-declare global {
-  var prisma: PrismaClient | undefined;
-}
+// This prevents multiple instances of Prisma Client in development.
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-const prisma = globalThis.prisma || new PrismaClient({
-  log: ['query', 'error', 'warn'],
-});
+// PrismaClient is attached to the `global` object in development to prevent
+// exhausting your database connection limit
+export const prisma = globalForPrisma.prisma || new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma;
-}
-
-// Add explicit type casting for decimal fields
-prisma.$use(async (params, next) => {
-  const result = await next(params);
-  if (params.model === 'Photo' && result) {
-    return {
-      ...result,
-      latitude: result.latitude !== null ? Number(result.latitude) : null,
-      longitude: result.longitude !== null ? Number(result.longitude) : null,
-    };
-  }
-  return result;
-});
-
-export { prisma }; 
+// If we're not in production, attach to the global object
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma; 

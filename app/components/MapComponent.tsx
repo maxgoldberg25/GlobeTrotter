@@ -28,7 +28,9 @@ export default function MapComponent() {
     try {
       // Add random query param to bypass any browser caching
       const timestamp = Date.now();
-      const response = await fetch(`/api/photos/locations?t=${timestamp}&fresh=true`, {
+      console.log('Fetching photos from API...');
+      
+      const response = await fetch(`/api/photos/locations?t=${timestamp}`, {
         method: 'GET',
         cache: 'no-store',
         headers: {
@@ -38,27 +40,56 @@ export default function MapComponent() {
         }
       });
       
+      console.log('API Response status:', response.status);
+      
       if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No error details');
+        console.error('API error response:', errorText);
         throw new Error(`API returned status ${response.status}`);
       }
       
-      const data = await response.json();
-      console.log(`Received photos data: ${JSON.stringify(data)}`);
+      let data;
+      try {
+        data = await response.json();
+        console.log('API data received successfully');
+      } catch (parseError) {
+        console.error('Error parsing JSON response:', parseError);
+        throw new Error('Failed to parse API response');
+      }
+      
+      if (!Array.isArray(data)) {
+        console.error('Expected array but got:', typeof data);
+        throw new Error(`Invalid response format: expected array but got ${typeof data}`);
+      }
+      
+      console.log(`Received ${data.length} photos from API`);
       
       // Ensure each photo has valid coordinates
-      const validPhotos = data.filter((photo: any) => 
-        photo && 
-        typeof photo.latitude === 'number' && 
-        typeof photo.longitude === 'number' &&
-        !isNaN(photo.latitude) && 
-        !isNaN(photo.longitude)
-      );
+      const validPhotos = data.filter((photo: any) => {
+        if (!photo) {
+          console.log('Filtering out null/undefined photo');
+          return false;
+        }
+        
+        const hasValidCoords = 
+          photo && 
+          typeof photo.latitude === 'number' && 
+          typeof photo.longitude === 'number' &&
+          !isNaN(photo.latitude) && 
+          !isNaN(photo.longitude);
+        
+        if (!hasValidCoords) {
+          console.log('Filtering out photo with invalid coordinates:', photo.id);
+        }
+        
+        return hasValidCoords;
+      });
       
       console.log(`Valid photos: ${validPhotos.length} of ${data.length}`);
       setPhotos(validPhotos);
       setError(null);
     } catch (error) {
-      console.error('Error fetching photos:', error);
+      console.error('Error loading photos:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch photos');
     } finally {
       setLoading(false);
