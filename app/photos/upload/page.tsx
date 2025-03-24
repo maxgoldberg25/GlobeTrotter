@@ -41,6 +41,11 @@ export default function UploadPhotoPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image too large - maximum 5MB');
+      return;
+    }
+
     // Preview the selected image
     setImageFile(file);
     const reader = new FileReader();
@@ -121,13 +126,36 @@ export default function UploadPhotoPage() {
   };
 
   const detectLocation = async (imageSource: string, isBase64: boolean = false): Promise<{success: boolean, lat?: number, lng?: number, name?: string}> => {
-    if (!imageSource) return {success: false};
-    
-    setIsDetectingLocation(true);
+    console.groupCollapsed('Location Detection Debug');
     try {
-      console.log('Calling location detection API...');
+      console.log('Detection started at:', new Date().toISOString());
       console.log('Image source type:', isBase64 ? 'base64' : 'url');
-      
+      console.log('Image source preview:', isBase64 ? 
+        imageSource.substring(0, 100) + '...' : 
+        imageSource
+      );
+
+      // Add before the fetch call
+      console.log('Request payload:', {
+        body: JSON.stringify(
+          isBase64 
+            ? { imageBase64: imageSource } 
+            : { imageUrl: imageSource }
+        ),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (isBase64) {
+        const [header, data] = imageSource.split(',');
+        console.log('Base64 validation:', {
+          headerValid: header.startsWith('data:image/'),
+          dataLength: data?.length,
+          encodingValid: /^[A-Za-z0-9+/]+={0,2}$/.test(data)
+        });
+      }
+
       const response = await fetch('/api/locations/detect', {
         method: 'POST',
         headers: {
@@ -140,25 +168,33 @@ export default function UploadPhotoPage() {
         ),
       });
 
-      console.log('API status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'No response body');
-        console.error('API error response:', errorText);
-        throw new Error(`Failed to detect location (${response.status})`);
+      console.log('API Response:', {
+        status: response.status,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers)
+      });
+
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        throw new Error('Invalid JSON response');
       }
 
-      const locationData = await response.json();
-      console.log('Location data received:', locationData);
-      
+      console.log('Parsed response data:', data);
+
       // Check if we have any predictions
-      if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {
+      if (!data || !Array.isArray(data) || data.length === 0) {
         toast.error('No location could be detected for this image');
         return {success: false};
       }
       
       // Find the prediction with highest confidence
-      const bestMatch = locationData[0];
+      const bestMatch = data[0];
       
       // CRITICAL FIX: Return values directly AND update state
       const detectedLat = bestMatch.latitude;
@@ -182,10 +218,16 @@ export default function UploadPhotoPage() {
         name: detectedName
       };
     } catch (error) {
-      console.error('Error detecting location:', error);
+      console.error('Full error details:', {
+        error,
+        imageSourceType: isBase64 ? 'base64' : 'url',
+        imageSourceLength: imageSource.length,
+        timestamp: new Date().toISOString()
+      });
       toast.error('Could not detect location automatically');
       return {success: false};
     } finally {
+      console.groupEnd();
       setIsDetectingLocation(false);
       setShouldUseAI(false);
     }
@@ -238,8 +280,7 @@ export default function UploadPhotoPage() {
           detectedCoords = await new Promise<{success: boolean, lat?: number, lng?: number, name?: string}>((resolve) => {
             reader.onloadend = async () => {
               const base64 = reader.result as string;
-              const base64Data = base64.split(',')[1];
-              const result = await detectLocation(base64Data, true);
+              const result = await detectLocation(base64, true);
               resolve(result);
             };
             reader.readAsDataURL(imageFile);
@@ -564,7 +605,7 @@ export default function UploadPhotoPage() {
                         toast('Analyzing image with AI...');
                         setIsDetectingLocation(true);
                         
-                        detectLocation(base64Data, true)
+                        detectLocation(base64, true)
                           .then(result => {
                             if (result.success) {
                               toast.success('Location detected! Check the map to verify.');
@@ -636,6 +677,15 @@ export default function UploadPhotoPage() {
           </div>
         </div>
       )}
+
+      {/* Temporary test button */}
+      <button 
+        onClick={() => detectLocation(
+          'https://upload.wikimedia.org/wikipedia/commons/8/83/San_Gimignano_03.jpg'
+        )}
+      >
+        Test with Sample Image
+      </button>
     </div>
   );
 } 
