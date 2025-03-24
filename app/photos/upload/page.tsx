@@ -146,12 +146,12 @@ export default function UploadPhotoPage() {
         title,
         imageUrl: finalImageUrl,
         location: location || null,
-        latitude: latitude ? Number(latitude) : null,
-        longitude: longitude ? Number(longitude) : null,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
       };
       
       // Add validation check
-      if (!latitude || !longitude) {
+      if (!photoData.latitude || !photoData.longitude) {
         toast.error("Please select a location on the map");
         return;
       }

@@ -24,7 +24,7 @@ export default function MapComponent() {
 
   const fetchPhotos = useCallback(async () => {
     try {
-      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
       const response = await fetch(`/api/photos/locations?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
@@ -35,17 +35,31 @@ export default function MapComponent() {
       });
       
       if (!response.ok) {
-        throw new Error(`API returned status ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `API returned status ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('Fetched photos:', data);
+      console.log('Raw API response:', data);
       
       if (!Array.isArray(data)) {
+        console.error('Invalid data format:', data);
         throw new Error('Invalid data format received');
       }
 
-      setPhotos(data);
+      // Validate coordinates
+      const validPhotos = data.filter(photo => 
+        photo.latitude != null && 
+        photo.longitude != null &&
+        !isNaN(Number(photo.latitude)) && 
+        !isNaN(Number(photo.longitude))
+      );
+
+      if (validPhotos.length !== data.length) {
+        console.warn(`Filtered out ${data.length - validPhotos.length} photos with invalid coordinates`);
+      }
+
+      setPhotos(validPhotos);
       setError(null);
     } catch (error) {
       console.error('Error fetching photos:', error);
