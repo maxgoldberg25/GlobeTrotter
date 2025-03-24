@@ -146,8 +146,8 @@ export default function UploadPhotoPage() {
         title,
         imageUrl: finalImageUrl,
         location: location || null,
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
+        latitude: latitude,
+        longitude: longitude,
       };
       
       // Add validation check
@@ -255,8 +255,16 @@ export default function UploadPhotoPage() {
                     </div>
                     
                     {/* Hidden inputs to store the coordinates */}
-                    <input type="hidden" name="latitude" value={latitude?.toString() || ''} />
-                    <input type="hidden" name="longitude" value={longitude?.toString() || ''} />
+                    <input 
+                      type="hidden" 
+                      name="latitude" 
+                      value={latitude?.toString() ?? ''} 
+                    />
+                    <input 
+                      type="hidden" 
+                      name="longitude" 
+                      value={longitude?.toString() ?? ''} 
+                    />
                   </div>
                   
                   <div className="mb-6">
