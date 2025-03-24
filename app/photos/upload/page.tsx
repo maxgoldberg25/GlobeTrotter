@@ -128,8 +128,14 @@ export default function UploadPhotoPage() {
   // Add this image resize function
   const resizeImageForAI = async (base64Image: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      // Use conditional check to ensure we're in browser context
-      const img = new (typeof window !== 'undefined' ? window.Image : Object)();
+      // Early return for server context
+      if (typeof window === 'undefined') {
+        return reject(new Error('Image resizing is only available in browser'));
+      }
+      
+      // Use createElement instead of new Image()
+      const img = document.createElement('img');
+      
       img.onload = () => {
         // Target dimensions - 800px max width/height while maintaining aspect ratio
         const MAX_SIZE = 800;
