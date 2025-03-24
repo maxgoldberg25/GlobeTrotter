@@ -21,12 +21,31 @@ GlobeTrotter is a social platform for travelers to share their photos and experi
 - **Image Storage**: Cloudinary
 - **Deployment**: Vercel
 
+## AI Location Detection Feature
 
+The application now includes an experimental AI-powered location detection feature using the Picarta API. This feature can automatically analyze photos and suggest potential location coordinates based on landmarks and visual features in the image.
+
+### Requirements
+
+- **Image Format**: Only JPEG images are supported for AI location detection
+- **API Key**: Requires a valid Picarta API key set in the environment variables
+- **Image Quality**: Best results achieved with clear, outdoor photos containing recognizable landmarks
+
+### How to Use
+
+1. Upload a JPEG image or provide an image URL in the photo upload form
+2. Click the "Use AI to Detect Location" button in the yellow information box
+3. The AI will analyze the image and attempt to determine the location
+4. If successful, the map will automatically update with the detected coordinates
+5. You can verify and adjust the detected location on the map if needed
+
+### Environment Setup
+
+To use this feature, you must set the following environment variable:
 
 ## Live Demo
 
 🌎 **Try GlobeTrotter**: [https://globe-trotter-sable.vercel.app/](https://globe-trotter-sable.vercel.app/)
-
 
 Experience the live application and explore features like:
 - Interactive world map with photo locations
@@ -143,7 +162,6 @@ To set up the admin user:
    - Password: `Password`
 4. Access the admin dashboard at [http://localhost:3000/admin](http://localhost:3000/admin)
 
-
 ### Continuous Deployment
 
 This project is set up for continuous deployment. Any changes pushed to the main branch will automatically be deployed.
@@ -196,3 +214,23 @@ This project is set up for continuous deployment. Any changes pushed to the main
 - **Database Hosting**: Neon
 - **CI/CD**: Vercel's GitHub Integration
 - **Environment Variables**: Vercel & .env.local
+
+## Recent Bug Fixes
+
+### Map Location Selection
+
+We've resolved an issue where manually selecting a location on the map wasn't properly recognized during form submission. The fix addresses:
+
+- Correctly handling zero-value coordinates (like longitude 0° at Greenwich)
+- Ensuring manual map selections take precedence over AI detection
+- Preventing the "Please select a location on the map" error when coordinates are already set
+
+### Image Size Optimization
+
+The application now automatically optimizes images to prevent payload size issues:
+
+- Large images are automatically resized before uploading to the server
+- Images for AI location detection are compressed to ensure compatibility with API limits
+- Original image quality is preserved for viewing while optimizing for server requirements
+
+These fixes improve reliability when uploading photos with both manual map selections and AI-detected locations.

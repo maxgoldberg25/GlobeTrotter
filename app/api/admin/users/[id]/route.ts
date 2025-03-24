@@ -11,7 +11,7 @@ export async function GET(
     // Get the current session
     const session = await getServerSession(authOptions);
     
-    // Check if user is authenticated and is the admin
+    // Check if user is authenticated and is the admin.
     if (!session?.user || session.user.email !== 'test@gmail.com') {
       return NextResponse.json(
         { error: 'Unauthorized' },
