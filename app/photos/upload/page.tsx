@@ -95,11 +95,96 @@ export default function UploadPhotoPage() {
     }
   };
 
+  // Add this function to compress images before final upload
+  const compressImageForUpload = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      // Early return for server context
+      if (typeof window === 'undefined') {
+        return reject(new Error('Image compression is only available in browser'));
+      }
+      
+      // If file is already under 1MB, return it as is
+      if (file.size <= 1 * 1024 * 1024) {
+        return resolve(file);
+      }
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.createElement('img');
+        img.onload = () => {
+          // Calculate target size - max dimension 1600px
+          const MAX_SIZE = 1600;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > height && width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          } else if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+          
+          // Create canvas and resize
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Could not get canvas context'));
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to blob
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Failed to create blob'));
+              return;
+            }
+            
+            // Create a new file from the blob
+            const newFile = new File(
+              [blob], 
+              file.name, 
+              { type: 'image/jpeg', lastModified: Date.now() }
+            );
+            
+            console.log(`Image compressed from ${file.size} to ${newFile.size} bytes`);
+            resolve(newFile);
+          }, 'image/jpeg', 0.85); // 85% quality
+        };
+        
+        img.onerror = () => reject(new Error('Failed to load image for compression'));
+        img.src = reader.result as string;
+      };
+      
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Then update the handleImageUpload function
   const handleImageUpload = async (file: File) => {
     try {
       setUploading(true);
+      
+      // Compress image before upload
+      let uploadFile = file;
+      if (file.size > 1 * 1024 * 1024) { // If larger than 1MB
+        toast('Optimizing image for upload...');
+        try {
+          uploadFile = await compressImageForUpload(file);
+        } catch (error) {
+          console.error('Image compression error:', error);
+          // Continue with original if compression fails
+        }
+      }
+      
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadFile);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -107,14 +192,13 @@ export default function UploadPhotoPage() {
       });
 
       if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('Upload error:', response.status, errorText);
         throw new Error('Failed to upload image');
       }
 
       const data = await response.json();
       setImageUrl(data.url);
-      // Don't set publicId until database is updated
-      // setPublicId(data.public_id);
-      
       return data.url;
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -728,15 +812,6 @@ export default function UploadPhotoPage() {
           </div>
         </div>
       )}
-
-      {/* Temporary test button */}
-      <button 
-        onClick={() => detectLocation(
-          'https://upload.wikimedia.org/wikipedia/commons/8/83/San_Gimignano_03.jpg'
-        )}
-      >
-        Test with Sample Image
-      </button>
     </div>
   );
 } 
