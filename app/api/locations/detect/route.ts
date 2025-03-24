@@ -158,15 +158,20 @@ export async function POST(request: Request) {
       
       // Add additional predictions from topk_predictions_dict if available
       if (result.topk_predictions_dict) {
-        Object.keys(result.topk_predictions_dict).forEach(key => {
-          const pred = result.topk_predictions_dict[key];
+        // Use a non-null assertion or explicit type casting
+        const predictionsDict = result.topk_predictions_dict as NonNullable<typeof result.topk_predictions_dict>;
+        
+        Object.keys(predictionsDict).forEach(key => {
+          const pred = predictionsDict[key];
           
           // Only add if different from primary prediction
           if (pred && pred.gps && pred.gps.length >= 2) {
             // Check if this is a duplicate of already added location
+            const gps = pred.gps; // Store in a variable to avoid repeated undefined checks
+            
             const isDuplicate = locations.some(loc => 
-              Math.abs(loc.latitude - pred.gps[0]) < 0.001 && 
-              Math.abs(loc.longitude - pred.gps[1]) < 0.001
+              Math.abs(loc.latitude - gps[0]) < 0.001 && 
+              Math.abs(loc.longitude - gps[1]) < 0.001
             );
             
             if (!isDuplicate) {
@@ -178,8 +183,8 @@ export async function POST(request: Request) {
               ].filter(Boolean);
               
               locations.push({
-                latitude: pred.gps[0],
-                longitude: pred.gps[1],
+                latitude: gps[0],
+                longitude: gps[1],
                 confidence: pred.confidence || 0.8,
                 locationName: locationParts.length > 0 
                   ? locationParts.join(", ") 
