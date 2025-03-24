@@ -99,9 +99,17 @@ export default function Dashboard() {
                 </Link>
               </div>
               
-              <Link href="/dashboard/edit" className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                Edit Profile
-              </Link>
+              <div className="mt-4">
+                <Link 
+                  href="/dashboard/find-friends" 
+                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mr-2"
+                >
+                  Find Friends
+                </Link>
+                <Link href="/profile/edit" className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                  Edit Profile
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -125,7 +133,9 @@ export default function Dashboard() {
         <div className="card">
           <h2 className="text-xl font-semibold mb-4">Connect</h2>
           <p className="text-gray-600 mb-4">Find friends and fellow travelers to follow.</p>
-          <button className="btn-primary">Find Friends</button>
+          <Link href="/dashboard/find-friends">
+            <button className="btn-primary">Find Friends</button>
+          </Link>
         </div>
       </div>
     </div>

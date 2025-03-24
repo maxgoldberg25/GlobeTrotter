@@ -7,37 +7,29 @@ import Link from "next/link";
 import Image from "next/image";
 import FollowButton from "@/app/components/FollowButton";
 
-// Add the appropriate interface
-interface Following {
+interface User {
   id: string;
   name: string | null;
   email: string | null;
   image: string | null;
-  // Add other properties your user object has
 }
 
-export default function MyFollowingPage() {
+export default function FindFriendsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  // Update the state initialization
-  const [following, setFollowing] = useState<Following[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // This function will be called after a successful unfollow action
-  const handleUnfollowed = (userId: string) => {
-    // Remove the unfollowed user from the list
-    setFollowing(prev => prev.filter(user => user.id !== userId));
-  };
+  const [searchTerm, setSearchTerm] = useState("");
   
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login?callbackUrl=/dashboard/following');
+      router.push('/login?callbackUrl=/dashboard/find-friends');
       return;
     }
     
     if (status === 'authenticated' && session?.user?.id) {
-      fetch(`/api/user/following`)
+      fetch(`/api/users/discover`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`Server responded with ${res.status}`);
@@ -45,18 +37,24 @@ export default function MyFollowingPage() {
           return res.json();
         })
         .then(data => {
-          const followingArray = Array.isArray(data) ? data : [];
-          setFollowing(followingArray);
+          const usersArray = Array.isArray(data) ? data : [];
+          setUsers(usersArray);
           setLoading(false);
         })
         .catch(error => {
-          console.error('Error fetching following:', error);
-          setError('Failed to load following. Please try again later.');
-          setFollowing([]);
+          console.error('Error discovering users:', error);
+          setError('Failed to load users. Please try again later.');
+          setUsers([]);
           setLoading(false);
         });
     }
   }, [status, session, router]);
+  
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => 
+    (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
   
   if (status === 'loading' || loading) {
     return <div className="container mx-auto p-4">Loading...</div>;
@@ -73,28 +71,45 @@ export default function MyFollowingPage() {
         </Link>
       </div>
       
-      <h1 className="text-2xl font-bold mb-8">People You Follow</h1>
+      <h1 className="text-2xl font-bold mb-8">Find Friends</h1>
+      
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
       
       {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
           {error}
         </div>
-      ) : following.length === 0 ? (
+      ) : filteredUsers.length === 0 ? (
         <div className="bg-white shadow-md rounded-lg p-8">
-          <p className="text-gray-600">You're not following anyone yet.</p>
-          <div className="mt-4">
-            <Link 
-              href="/dashboard/find-friends" 
-              className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-            >
-              Find Friends to Follow
-            </Link>
-          </div>
+          <p className="text-gray-600">
+            {searchTerm 
+              ? `No users found matching "${searchTerm}"`
+              : "No users available to follow right now."
+            }
+          </p>
         </div>
       ) : (
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <ul className="divide-y divide-gray-200">
-            {following.map(user => (
+            {filteredUsers.map(user => (
               <li key={user.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <Link href={`/profile/${user.id}`} className="flex items-center flex-1">
@@ -117,13 +132,7 @@ export default function MyFollowingPage() {
                       <p className="text-sm text-gray-500">{user.email || 'No email'}</p>
                     </div>
                   </Link>
-                  
-                  {/* Key fix: Set isFollowing to true and pass onUnfollowed callback */}
-                  <FollowButton 
-                    userId={user.id} 
-                    isFollowing={true} 
-                    onUnfollowed={() => handleUnfollowed(user.id)}
-                  />
+                  <FollowButton userId={user.id} isFollowing={false} />
                 </div>
               </li>
             ))}

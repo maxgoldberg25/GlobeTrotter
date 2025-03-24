@@ -1,87 +1,116 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, MouseEvent } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 interface FollowButtonProps {
   userId: string;
   isFollowing: boolean;
+  onUnfollowed?: (userId: string) => void;
 }
 
-export default function FollowButton({ userId, isFollowing: initialIsFollowing }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+export default function FollowButton({ userId, isFollowing: initialIsFollowing, onUnfollowed }: FollowButtonProps) {
   const { data: session } = useSession();
-  const router = useRouter();
-  
-  const handleFollow = async () => {
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  if (!session || session.user.id === userId) {
+    return null;
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
+  const handleClick = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     setIsLoading(true);
-    
+    setErrorMessage(null);
+
     try {
       if (isFollowing) {
-        // Unfollow
-        const response = await fetch(`/api/follow?targetUserId=${userId}`, { 
-          method: 'DELETE' 
+        console.log(`Attempting to unfollow user ${userId}`);
+        const response = await fetch(`/api/follow/${userId}`, {
+          method: 'DELETE',
         });
         
-        if (!response.ok) throw new Error('Failed to unfollow');
+        console.log(`Unfollow response status: ${response.status}`);
+        const data = await response.json();
+        console.log('Unfollow response data:', data);
+
+        if (response.ok) {
+          setIsFollowing(false);
+          
+          // Call the callback if provided
+          if (onUnfollowed) {
+            onUnfollowed(userId);
+          }
+        } else {
+          console.error('Failed to unfollow:', data.error);
+          setErrorMessage(data.error || 'Failed to unfollow user');
+        }
       } else {
         // Follow
         const response = await fetch('/api/follow', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetUserId: userId })
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ targetUserId: userId }),
         });
-        
-        if (!response.ok) throw new Error('Failed to follow');
+
+        if (response.ok) {
+          setIsFollowing(true);
+        } else {
+          console.error('Failed to follow');
+        }
       }
-      
-      setIsFollowing(!isFollowing);
-      // Force a hard refresh to update follower counts
-      window.location.reload();
     } catch (error) {
-      console.error('Follow action failed:', error);
+      console.error('Error toggling follow status:', error);
+      setErrorMessage('Network error occurred');
     } finally {
       setIsLoading(false);
+      setIsHovering(false);
     }
   };
 
-  // Don't show button on your own profile
-  if (session?.user?.id === userId) return null;
+  // Button text based on state
+  let buttonText = isFollowing
+    ? isHovering 
+      ? 'Unfollow' 
+      : 'Following'
+    : 'Follow';
+    
+  if (isLoading) {
+    buttonText = isFollowing ? 'Unfollowing...' : 'Following...';
+  }
+
+  // Button styling
+  const buttonClass = isFollowing
+    ? isHovering 
+      ? 'bg-red-500 hover:bg-red-600 text-white' // Unfollow hover state
+      : 'bg-gray-200 text-gray-800 hover:bg-gray-300' // Following state
+    : 'bg-blue-600 text-white hover:bg-blue-700'; // Follow state
 
   return (
     <button
-      onClick={handleFollow}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       disabled={isLoading}
-      className={`px-4 py-2 rounded-md transition-colors ${
-        isFollowing 
-          ? isHovering
-            ? 'bg-red-600 text-white hover:bg-red-700' // Hover state for unfollow
-            : 'bg-gray-600 text-white hover:bg-gray-700' // Normal following state
-          : 'bg-blue-500 text-white hover:bg-blue-600' // Not following state
-      }`}
+      className={`px-4 py-2 rounded-md transition-colors ${buttonClass} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
     >
-      {isLoading ? (
-        <span className="flex items-center justify-center">
-          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          {isFollowing ? 'Unfollowing...' : 'Following...'}
-        </span>
-      ) : (
-        isFollowing
-          ? (isHovering ? 'Unfollow' : 'Following')
-          : 'Follow'
+      {buttonText}
+      {errorMessage && (
+        <div className="absolute mt-1 text-xs text-red-600 bg-red-50 p-1 rounded-md border border-red-100">
+          {errorMessage}
+        </div>
       )}
     </button>
   );
