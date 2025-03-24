@@ -87,6 +87,7 @@ export default function UploadPhotoPage() {
   };
 
   const handleLocationSelect = (lat: number, lng: number, address?: string) => {
+    console.log("Map selection:", { lat, lng, address });
     setLatitude(lat);
     setLongitude(lng);
     
@@ -380,13 +381,8 @@ export default function UploadPhotoPage() {
       return;
     }
 
-    // Check if location is missing
-    const locationMissing = !latitude || !longitude;
-
-    // If location is missing, set flag to use AI
-    if (locationMissing) {
-      setShouldUseAI(true);
-    }
+    // IMPORTANT: Check if location is missing
+    const locationMissing = latitude === null || longitude === null;
 
     setUploading(true);
     setError(null);
@@ -402,8 +398,9 @@ export default function UploadPhotoPage() {
         }
       }
       
-      // If no location coordinates, try AI detection automatically
-      if (locationMissing) {
+      // Only attempt AI detection if specifically requested via shouldUseAI flag
+      // This prevents overriding manual map selections
+      if (locationMissing && shouldUseAI) {
         let detectedCoords = null;
         
         toast('Attempting to detect location with AI...');
@@ -438,9 +435,14 @@ export default function UploadPhotoPage() {
         setLatitude(detectedCoords.lat || null);
         setLongitude(detectedCoords.lng || null);
         setLocation(detectedCoords.name || location || '');
+      } else if (locationMissing) {
+        // If location is missing and AI is not being used, ask user to provide it
+        setUploading(false);
+        setError('Please select a location on the map or use AI detection');
+        return;
       }
 
-      // Create photo data using the current state
+      // Create photo data using the current state values
       const photoData = {
         title,
         imageUrl: finalImageUrl,
