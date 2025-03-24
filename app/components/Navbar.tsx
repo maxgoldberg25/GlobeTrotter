@@ -135,12 +135,11 @@ export default function Navbar() {
           {status === "authenticated" && (
             <>
               <Link
-                href="/upload"
-                className={`${
-                  scrolled || !isHomePage ? "text-gray-700" : "text-white"
-                } hover:text-primary transition-colors font-medium`}
+                href="/photos/upload"
+                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
               >
-                Upload Photos
+                <span className="mr-2">+</span>
+                Upload Photo
               </Link>
               <Link
                 href="/dashboard"
@@ -344,11 +343,11 @@ export default function Navbar() {
             {status === "authenticated" && (
               <>
                 <Link
-                  href="/upload"
+                  href="/photos/upload"
                   className="text-gray-700 hover:text-primary py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Upload Photos
+                  Upload Photo
                 </Link>
                 <Link
                   href="/dashboard"

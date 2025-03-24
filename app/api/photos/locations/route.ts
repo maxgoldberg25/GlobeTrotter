@@ -7,12 +7,13 @@ export async function GET() {
   try {
     console.log("Starting photo location fetch...");
     
-    // First, let's count all photos
-    const totalPhotos = await prisma.photo.count();
-    console.log("Total photos in database:", totalPhotos);
-    
-    // Simplified query to check all photos with their coordinates
-    const allPhotosWithCoords = await prisma.photo.findMany({
+    const photos = await prisma.photo.findMany({
+      where: {
+        AND: [
+          { latitude: { not: null } },
+          { longitude: { not: null } }
+        ]
+      },
       select: {
         id: true,
         title: true,
@@ -33,34 +34,15 @@ export async function GET() {
       }
     });
 
-    console.log("All photos with their coordinates:", 
-      allPhotosWithCoords.map(p => ({
-        id: p.id,
-        title: p.title,
-        lat: p.latitude,
-        lng: p.longitude,
-        createdAt: p.createdAt
-      }))
-    );
+    console.log(`Found ${photos.length} photos with location data`);
 
-    // Filter photos with coordinates in JavaScript to debug
-    const validPhotos = allPhotosWithCoords.filter(p => 
-      p.latitude !== null && 
-      p.longitude !== null &&
-      !isNaN(Number(p.latitude)) && 
-      !isNaN(Number(p.longitude))
-    );
+    // Add cache control headers
+    const response = NextResponse.json(photos);
+    response.headers.set('Cache-Control', 'no-store');
+    response.headers.set('Surrogate-Control', 'no-store');
+    
+    return response;
 
-    console.log("Valid photos after filtering:", 
-      validPhotos.map(p => ({
-        id: p.id,
-        title: p.title,
-        lat: p.latitude,
-        lng: p.longitude
-      }))
-    );
-
-    return NextResponse.json(validPhotos);
   } catch (error) {
     console.error("Error in photos/locations API:", error);
     return NextResponse.json(

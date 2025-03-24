@@ -22,6 +22,36 @@ export default function MapComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchPhotos = async () => {
+    try {
+      const response = await fetch('/api/photos/locations', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch photos');
+      
+      const data = await response.json();
+      console.log('Fetched photos:', data);
+      setPhotos(data);
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPhotos();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchPhotos, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     // Fix Leaflet icon issue
     delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -30,24 +60,6 @@ export default function MapComponent() {
       iconUrl: '/images/marker-icon.png',
       shadowUrl: '/images/marker-shadow.png',
     });
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/photos/locations')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch photos');
-        return res.json();
-      })
-      .then(data => {
-        console.log('Received photos:', data);
-        setPhotos(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error loading photos:', err);
-        setError(err.message);
-        setLoading(false);
-      });
   }, []);
 
   if (loading) {
