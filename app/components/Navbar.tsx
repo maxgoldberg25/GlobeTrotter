@@ -136,10 +136,11 @@ export default function Navbar() {
             <>
               <Link
                 href="/photos/upload"
-                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                className={`${
+                  scrolled || !isHomePage ? "text-gray-700" : "text-white"
+                } hover:text-primary transition-colors font-medium`}
               >
-                <span className="mr-2">+</span>
-                Upload Photo
+                Upload Photos
               </Link>
               <Link
                 href="/dashboard"
