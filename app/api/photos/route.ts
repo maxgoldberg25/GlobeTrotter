@@ -56,6 +56,12 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc',
       },
+      select: {
+        id: true,
+        title: true,
+        imageUrl: true,
+        ...(process.env.NODE_ENV === 'development' ? { publicId: true } : {})
+      }
     });
     
     return NextResponse.json(photos);
