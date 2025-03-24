@@ -52,8 +52,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   photos        Photo[]
-  followers     Follow[]  @relation("Following")
-  following     Follow[]  @relation("Follower")
+  followers     Follow[]  @relation("follower")
+  following     Follow[]  @relation("following")
 }
 
 model VerificationToken {
@@ -81,13 +81,11 @@ model Photo {
 
 model Follow {
   id          String   @id @default(cuid())
-  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  follower    User     @relation("follower", fields: [followerId], references: [id])
   followerId  String
-  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  following   User     @relation("following", fields: [followingId], references: [id])
   followingId String
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
-  @@index([followerId])
-  @@index([followingId])
 } 
