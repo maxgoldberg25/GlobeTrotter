@@ -199,16 +199,17 @@ export default function UploadPhotoPage() {
     }
 
     if (!imageFile && !imageUrl) {
-      setError("Please select an image or enter an image URL");
+      setError("Please select an image to upload");
       return;
     }
 
     // Check if location is missing
     const locationMissing = !latitude || !longitude;
 
-    // If location is missing, set flag to use AI
-    if (locationMissing) {
-      setShouldUseAI(true);
+    // If location is missing but AI wasn't explicitly requested, show error
+    if (locationMissing && !shouldUseAI) {
+      setError("Please select a location on the map");
+      return;
     }
 
     setUploading(true);
@@ -225,11 +226,10 @@ export default function UploadPhotoPage() {
         }
       }
       
-      // If no location coordinates, try AI detection automatically
-      if (locationMissing) {
-        let detectedCoords = null;
-        
-        toast('Attempting to detect location with AI...');
+      // Only use AI detection if the user explicitly selected that option
+      let detectedCoords = null;
+      if (shouldUseAI && locationMissing) {
+        toast('Analyzing image with AI...');
         
         if (imageFile) {
           // For uploads, convert to base64 and detect
@@ -248,64 +248,60 @@ export default function UploadPhotoPage() {
           detectedCoords = await detectLocation(finalImageUrl);
         }
         
-        // If detection failed, inform user and stop
+        // If detection was requested but failed, inform user and stop
         if (!detectedCoords?.success) {
           setUploading(false);
-          setError('Please provide location information manually - AI detection failed');
+          setError('AI detection failed. Please select a location manually.');
           return;
         }
         
-        // Use the returned coordinates directly, don't rely on state
-        console.log("Detection successful, using coordinates:", detectedCoords);
-        
-        // Update the state values (redundant but ensures UI is consistent)
+        // Update the state with detected coordinates
         setLatitude(detectedCoords.lat || null);
         setLongitude(detectedCoords.lng || null);
-        setLocation(detectedCoords.name || location || '');
+        setLocation(detectedCoords.name || '');
+      } else if (locationMissing) {
+        // This case should not happen with our new validation, but just in case
+        setUploading(false);
+        setError('Please select a location on the map');
+        return;
       }
-
+      
       // Create photo data using the current state
       const photoData = {
         title,
         imageUrl: finalImageUrl,
         location: location || null,
-        latitude: latitude !== null ? Number(latitude) : null,
-        longitude: longitude !== null ? Number(longitude) : null,
+        latitude: detectedCoords?.lat || latitude,
+        longitude: detectedCoords?.lng || longitude,
       };
-
+      
       // Final check to ensure we have coordinates
       if (!photoData.latitude || !photoData.longitude) {
         console.error("Coordinates missing from photoData:", photoData);
-        setError("Please select a location on the map or try AI detection again");
+        setError("Please select a location on the map");
         setUploading(false);
         return;
       }
-
+      
       console.log("Submitting photo data:", photoData);
-
-      // Log the exact JSON being sent to help debug
-      const jsonPayload = JSON.stringify(photoData);
-      console.log("JSON payload:", jsonPayload);
-
+      
       const response = await fetch("/api/photos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: jsonPayload,
+        body: JSON.stringify(photoData),
       });
-
+      
       if (!response.ok) {
-        // More detailed error handling
-        const errorText = await response.text().catch(() => null);
-        console.error("API error:", response.status, errorText);
-        throw new Error(errorText || `Failed to save photo (${response.status})`);
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save photo");
       }
-
+      
       toast.success('Photo uploaded successfully!');
       setSuccess(true);
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/photos");
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -553,6 +549,9 @@ export default function UploadPhotoPage() {
                       toast.error('Please select an image first');
                       return;
                     }
+                    
+                    // Set the flag to use AI
+                    setShouldUseAI(true);
                     
                     if (imageFile) {
                       const reader = new FileReader();
