@@ -23,6 +23,16 @@ GlobeTrotter is a social platform for travelers to share their photos and experi
 
 ## Getting Started
 
+## Live Demo
+
+🌎 **Try GlobeTrotter**: [https://globe-trotter-sable.vercel.app/](https://globe-trotter-sable.vercel.app/)
+
+Experience the live application and explore features like:
+- Interactive world map with photo locations
+- Photo uploads with geolocation
+- User profiles and authentication
+- Social connections with other travelers
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/globetrotter.git
