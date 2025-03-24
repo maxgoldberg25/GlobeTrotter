@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
+import { detectImageLocation } from '@/lib/picarta';
 
 export async function POST(request: Request) {
   try {
@@ -9,27 +10,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { imageUrl, imageBase64 } = await request.json();
+    const body = await request.json();
+    const { imageUrl, imageBase64 } = body;
+    const imageSource = imageBase64 || imageUrl;
     
-    console.log('Location detection API called');
-    console.log('Image source received:', imageUrl ? 'URL provided' : imageBase64 ? 'Base64 provided' : 'No image source');
+    if (!imageSource) {
+      return NextResponse.json(
+        { error: 'Image source (URL or base64) is required' },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.PICARTA_API_KEY;
+    if (!apiKey) {
+      console.error('Picarta API key not found in environment variables');
+      return NextResponse.json(
+        { error: 'API configuration error' },
+        { status: 500 }
+      );
+    }
+
+    console.log('Calling Picarta AI detection service...');
+    const locationData = await detectImageLocation(imageSource, apiKey);
     
-    // For now, return a mock response with London coordinates
-    // This is a placeholder until Picarta API is integrated
-    return NextResponse.json([
-      {
-        latitude: 51.5074,
-        longitude: -0.1278,
-        confidence: 0.9,
-        locationName: "London, United Kingdom"
-      },
-      {
-        latitude: 40.7128,
-        longitude: -74.0060,
-        confidence: 0.2,
-        locationName: "New York, NY, USA"
-      }
-    ]);
+    if (!locationData || locationData.length === 0) {
+      return NextResponse.json(
+        { error: 'Could not detect location' },
+        { status: 404 }
+      );
+    }
+
+    console.log('Picarta detection successful, returning data');
+    return NextResponse.json(locationData);
   } catch (error) {
     console.error('Error in location detection API:', error);
     return NextResponse.json(

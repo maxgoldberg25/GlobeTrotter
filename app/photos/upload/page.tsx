@@ -148,7 +148,7 @@ export default function UploadPhotoPage() {
       }
 
       const locationData = await response.json();
-      console.log('Location data received:', locationData);
+      console.log('Real Picarta API response received:', locationData);
       
       // Check if we have any predictions
       if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {
@@ -164,7 +164,7 @@ export default function UploadPhotoPage() {
       const detectedLng = bestMatch.longitude;
       const detectedName = bestMatch.locationName || 'Detected location';
       
-      console.log('Setting coordinates:', { lat: detectedLat, lng: detectedLng, name: detectedName });
+      console.log('Setting coordinates from real API:', { lat: detectedLat, lng: detectedLng, name: detectedName });
       
       // Update state variables
       setLatitude(detectedLat);
@@ -300,9 +300,10 @@ export default function UploadPhotoPage() {
       
       toast.success('Photo uploaded successfully!');
       setSuccess(true);
+      
       setTimeout(() => {
-        router.push("/photos");
-      }, 2000);
+        window.location.href = "/map";
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

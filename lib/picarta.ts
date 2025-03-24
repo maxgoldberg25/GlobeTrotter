@@ -24,6 +24,8 @@ export async function detectImageLocation(
   }
 ): Promise<PicartaLocation[] | null> {
   try {
+    console.log('Calling Picarta API with real key...');
+    
     // Prepare the payload according to Picarta's API documentation
     const payload = {
       "TOKEN": apiKey,
@@ -34,8 +36,6 @@ export async function detectImageLocation(
       "RADIUS": options?.radius || null,
     };
 
-    console.log('Sending request to Picarta API...');
-    
     const response = await fetch('https://picarta.ai/classify', {
       method: 'POST',
       headers: {
@@ -51,7 +51,7 @@ export async function detectImageLocation(
     }
 
     const data = await response.json();
-    console.log('Picarta API raw response:', data);
+    console.log('Raw Picarta API response:', JSON.stringify(data).substring(0, 200) + '...');
     
     // Check if the API returned location data
     if (data && Array.isArray(data.predictions) && data.predictions.length > 0) {
