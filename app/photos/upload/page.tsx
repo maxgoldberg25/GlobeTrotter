@@ -128,7 +128,8 @@ export default function UploadPhotoPage() {
   // Add this image resize function
   const resizeImageForAI = async (base64Image: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
+      // Use conditional check to ensure we're in browser context
+      const img = new (typeof window !== 'undefined' ? window.Image : Object)();
       img.onload = () => {
         // Target dimensions - 800px max width/height while maintaining aspect ratio
         const MAX_SIZE = 800;
@@ -185,7 +186,9 @@ export default function UploadPhotoPage() {
       if (isBase64) {
         // If image is larger than 1MB, resize it
         if (imageSource.length > 1024 * 1024) {
-          toast.info('Optimizing image for AI processing...');
+          toast('Optimizing image for AI processing...', {
+            icon: 'ℹ️',
+          });
           try {
             processedImageSource = await resizeImageForAI(imageSource);
             console.log('Image was resized for API submission');
