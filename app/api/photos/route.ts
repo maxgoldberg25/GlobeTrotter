@@ -6,42 +6,47 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, imageUrl, location, latitude, longitude } = await request.json();
-
-    // Validate required fields
-    if (!title || !imageUrl) {
+    const data = await request.json();
+    
+    // Add validation for coordinates
+    if (typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
       return NextResponse.json(
-        { error: 'Title and image URL are required' },
+        { error: 'Invalid coordinates format' },
         { status: 400 }
       );
     }
 
-    // Create photo without publicId
+    // Create the photo with explicit type casting
     const photo = await prisma.photo.create({
       data: {
-        userId: session.user.id,
-        title,
-        imageUrl,
-        location: location || null,
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
+        title: data.title,
+        imageUrl: data.imageUrl,
+        latitude: Number(data.latitude),
+        longitude: Number(data.longitude),
+        location: data.location,
+        user: {
+          connect: {
+            email: session.user.email,
+          },
+        },
       },
     });
 
-    return NextResponse.json(photo);
+    // Return the complete photo data including coordinates
+    return NextResponse.json({
+      ...photo,
+      latitude: Number(photo.latitude),
+      longitude: Number(photo.longitude)
+    });
+
   } catch (error) {
     console.error('Error creating photo:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to create photo',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        // Add stack trace only in development
-        ...(process.env.NODE_ENV === 'development' && { stack: error instanceof Error ? error.stack : undefined })
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

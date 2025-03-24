@@ -24,8 +24,7 @@ export default function MapComponent() {
 
   const fetchPhotos = useCallback(async () => {
     try {
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/api/photos/locations?t=${timestamp}`, {
+      const response = await fetch(`/api/photos/locations?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -34,49 +33,25 @@ export default function MapComponent() {
         }
       });
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API returned status ${response.status}`);
-      }
-      
       const data = await response.json();
-      console.log('Raw API response:', data);
+      console.log('API Response:', data);
       
-      if (!Array.isArray(data)) {
-        console.error('Invalid data format:', data);
-        throw new Error('Invalid data format received');
-      }
-
-      // Validate coordinates
-      const validPhotos = data.filter(photo => 
-        photo.latitude != null && 
-        photo.longitude != null &&
-        !isNaN(Number(photo.latitude)) && 
-        !isNaN(Number(photo.longitude))
-      );
-
-      if (validPhotos.length !== data.length) {
-        console.warn(`Filtered out ${data.length - validPhotos.length} photos with invalid coordinates`);
-      }
-
-      setPhotos(validPhotos);
-      setError(null);
+      // Force update the markers by creating new object references
+      setPhotos(prev => data.map((p: any) => ({
+        ...p,
+        latitude: Number(p.latitude),
+        longitude: Number(p.longitude)
+      })));
+      
     } catch (error) {
       console.error('Error fetching photos:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch photos');
-    } finally {
-      setLoading(false);
     }
   }, []);
 
-  // Initial fetch
+  // Add more aggressive refresh
   useEffect(() => {
     fetchPhotos();
-  }, [fetchPhotos]);
-
-  // Set up polling for updates
-  useEffect(() => {
-    const interval = setInterval(fetchPhotos, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchPhotos, 5000);
     return () => clearInterval(interval);
   }, [fetchPhotos]);
 
