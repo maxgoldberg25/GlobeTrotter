@@ -51,50 +51,35 @@ export default function AuthError() {
   ];
 
   return (
-    <PageContainer>
-      <div className="max-w-md mx-auto bg-white shadow-md rounded-lg p-8">
-        <div className="flex items-center justify-center mb-6">
-          <div className="bg-red-100 p-3 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Authentication Error</h1>
-        
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-          <p className="text-red-700">{errorMessage}</p>
-          <p className="text-xs text-gray-500 mt-1">Error type: {errorType}</p>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Troubleshooting Tips:</h2>
-          <ul className="list-disc pl-5 space-y-1">
-            {troubleshootingTips.map((tip, index) => (
-              <li key={index} className="text-gray-700">{tip}</li>
-            ))}
-          </ul>
+    <PageContainer className="flex items-center justify-center">
+      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-lg shadow-md">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            Authentication Error
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-400">
+            {errorMessage || "An error occurred during authentication."}
+          </p>
         </div>
 
         <div className="space-y-3">
           <Link 
             href="/login" 
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center transition-colors"
           >
             Try Again
           </Link>
           <Link 
             href="/" 
-            className="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded text-center"
+            className="block w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded text-center transition-colors"
           >
             Back to Home
           </Link>
         </div>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Need help? <Link href="/contact" className="text-blue-600 hover:underline">Contact Support</Link>
+          <p className="text-sm text-gray-400">
+            Need help? <Link href="/contact" className="text-blue-400 hover:text-blue-300">Contact Support</Link>
           </p>
         </div>
       </div>

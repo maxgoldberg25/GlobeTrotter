@@ -4,6 +4,22 @@ import { useEffect, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import Link from 'next/link';
+
+// Add custom styles for popup
+const popupStyles = `
+  .leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-tip {
+    display: none !important;
+  }
+  .leaflet-popup-content {
+    margin: 0 !important;
+  }
+`;
 
 interface Photo {
   id: string;
@@ -148,35 +164,55 @@ export default function MapComponent() {
   }
 
   return (
-    <MapContainer
-      key={key} // Force remount when key changes
-      center={[photos[0].latitude, photos[0].longitude]}
-      zoom={13}
-      style={{ height: 'calc(100vh - 4rem)', width: '100%' }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {photos.map(photo => (
-        <Marker
-          key={photo.id}
-          position={[photo.latitude, photo.longitude]}
-        >
-          <Popup>
-            <div className="max-w-xs">
-              <img 
-                src={photo.imageUrl} 
-                alt={photo.title}
-                className="w-full h-32 object-cover mb-2"
-              />
-              <h3 className="font-bold">{photo.title}</h3>
-              {photo.location && <p className="text-sm">{photo.location}</p>}
-              <p className="text-xs text-gray-500">By {photo.user.name}</p>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <>
+      <style>{popupStyles}</style>
+      <MapContainer
+        key={key}
+        center={[photos[0].latitude, photos[0].longitude]}
+        zoom={13}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {photos.map(photo => (
+          <Marker
+            key={photo.id}
+            position={[photo.latitude, photo.longitude]}
+          >
+            <Popup>
+              <div className="max-w-[180px] bg-gray-800 rounded-lg overflow-hidden">
+                <div className="relative">
+                  <img 
+                    src={photo.imageUrl} 
+                    alt={photo.title}
+                    className="w-full h-24 object-cover"
+                  />
+                </div>
+                <div className="p-2">
+                  <h3 className="text-xs font-bold text-white mb-0.5">{photo.title}</h3>
+                  {photo.location && (
+                    <p className="text-[10px] text-gray-300 flex items-center mb-0.5">
+                      <svg className="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      {photo.location}
+                    </p>
+                  )}
+                  <p className="text-[10px] text-gray-400 flex items-center">
+                    <svg className="w-2.5 h-2.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    By {photo.user.name}
+                  </p>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </>
   );
 } 

@@ -134,12 +134,12 @@ export default function AdminPage() {
   if (error) {
     return (
       <PageContainer>
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+        <div className="bg-gray-800 rounded-lg shadow-md p-6 text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Access Denied</h1>
+          <p className="text-gray-400 mb-6">{error}</p>
           <button 
             onClick={() => router.push('/')}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
             Return to Home
           </button>
@@ -150,44 +150,44 @@ export default function AdminPage() {
 
   return (
     <PageContainer>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <p className="text-gray-600 mb-6">
+      <div className="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h1 className="text-2xl font-bold mb-4 text-white">Admin Dashboard</h1>
+        <p className="text-gray-400 mb-6">
           Welcome, {session?.user?.name || 'Admin'}. This page displays all {users.length} registered users from the database.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-gray-800 rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">All Users ({users.length})</h2>
-          <div className="text-sm text-gray-500">
+          <h2 className="text-xl font-bold text-white">All Users ({users.length})</h2>
+          <div className="text-sm text-gray-400">
             Showing {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, users.length)} of {users.length} users
           </div>
         </div>
         
         {users.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-400">
             No users found in the database
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white">
+              <table className="min-w-full bg-gray-800">
                 <thead>
-                  <tr className="bg-gray-100 border-b">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Joined</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <tr className="bg-gray-700 border-b border-gray-600">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-300">User</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-300">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-300">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-300">Joined</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-300">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentUsers.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-50">
+                    <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-700">
                       <td className="py-3 px-4">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full mr-3 flex items-center justify-center overflow-hidden">
+                          <div className="w-10 h-10 bg-gray-700 rounded-full mr-3 flex items-center justify-center overflow-hidden">
                             {user.image ? (
                               <Image
                                 src={user.image}
@@ -202,41 +202,41 @@ export default function AdminPage() {
                               </span>
                             )}
                           </div>
-                          <span>{user.name || 'Unnamed User'}</span>
+                          <span className="text-gray-300">{user.name || 'Unnamed User'}</span>
                           {user.email === 'test@gmail.com' && (
-                            <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            <span className="ml-2 px-2 py-1 text-xs bg-blue-900 text-blue-200 rounded-full">
                               Admin
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4">{user.email}</td>
+                      <td className="py-3 px-4 text-gray-300">{user.email}</td>
                       <td className="py-3 px-4">
                         {user.emailVerified ? (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                          <span className="px-2 py-1 bg-green-900 text-green-200 rounded-full text-xs">
                             Verified
                           </span>
                         ) : (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
+                          <span className="px-2 py-1 bg-yellow-900 text-yellow-200 rounded-full text-xs">
                             Unverified
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4" title={formatDate(user.createdAt)}>
+                      <td className="py-3 px-4 text-gray-300" title={formatDate(user.createdAt)}>
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <td className="px-5 py-5 border-b border-gray-700 bg-gray-800 text-sm">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => router.push(`/profile/${user.id}`)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-400 hover:text-blue-300"
                           >
                             View
                           </button>
                           {user.email !== 'test@gmail.com' && (
                             <button
                               onClick={() => handleDeleteUser(user.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-red-400 hover:text-red-300"
                             >
                               Delete
                             </button>
@@ -256,10 +256,10 @@ export default function AdminPage() {
                   <button
                     onClick={() => paginate(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className={`px-3 py-1 rounded-l-md border ${
+                    className={`px-3 py-1 rounded-l-md border border-gray-600 ${
                       currentPage === 1 
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                        : 'bg-white text-blue-500 hover:bg-blue-50'
+                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                        : 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                     }`}
                   >
                     Previous
@@ -269,10 +269,10 @@ export default function AdminPage() {
                     <button
                       key={number}
                       onClick={() => paginate(number)}
-                      className={`px-3 py-1 border-t border-b ${
+                      className={`px-3 py-1 border-t border-b border-gray-600 ${
                         currentPage === number
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white text-blue-500 hover:bg-blue-50'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                       }`}
                     >
                       {number}
@@ -282,10 +282,10 @@ export default function AdminPage() {
                   <button
                     onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className={`px-3 py-1 rounded-r-md border ${
+                    className={`px-3 py-1 rounded-r-md border border-gray-600 ${
                       currentPage === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-blue-500 hover:bg-blue-50'
+                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-800 text-blue-400 hover:bg-gray-700'
                     }`}
                   >
                     Next
@@ -300,12 +300,12 @@ export default function AdminPage() {
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Confirm Deletion</h3>
-            <p className="mb-6">Are you sure you want to delete this user? This action cannot be undone.</p>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
+            <h3 className="text-xl font-bold mb-4 text-white">Confirm Deletion</h3>
+            <p className="mb-6 text-gray-400">Are you sure you want to delete this user? This action cannot be undone.</p>
             
             {deleteError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+              <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded mb-4" role="alert">
                 <p>{deleteError}</p>
               </div>
             )}
@@ -313,7 +313,7 @@ export default function AdminPage() {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 border border-gray-600 rounded text-gray-300 hover:bg-gray-700"
                 disabled={isDeleting}
               >
                 Cancel
