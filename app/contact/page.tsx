@@ -120,10 +120,10 @@ export default function Contact() {
 
               <button
                 type="submit"
-                disabled={status === "loading"}
+                disabled={status === "sending"}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {status === "loading" ? "Sending..." : "Send Message"}
+                {status === "sending" ? "Sending..." : "Send Message"}
               </button>
             </form>
           )}

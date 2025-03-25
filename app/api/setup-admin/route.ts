@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 // This is a one-time setup route for creating the admin user
 // In a production environment, you would restrict this endpoint accordingly
 export async function GET() {
