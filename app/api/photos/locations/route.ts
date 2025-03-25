@@ -43,6 +43,7 @@ export async function GET() {
           select: {
             id: true,
             name: true,
+            email: true,
           },
         },
       },
@@ -69,7 +70,8 @@ export async function GET() {
             createdAt: photo.createdAt,
             user: {
               id: photo.user?.id,
-              name: photo.user?.name || 'Unknown'
+              name: photo.user?.name || 'Unknown',
+              email: photo.user?.email || ''
             }
           };
         } catch (e) {

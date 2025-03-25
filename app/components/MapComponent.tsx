@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 // Add custom styles for popup
 const popupStyles = `
@@ -30,14 +31,35 @@ interface Photo {
   location: string;
   user: {
     name: string;
+    email: string;
   };
 }
+
+// Fix for default marker icons in Next.js
+const defaultIcon = L.icon({
+  iconUrl: '/images/marker-icon.png',
+  shadowUrl: '/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+const userIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: '/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 export default function MapComponent() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [key, setKey] = useState(Date.now()); // Add a key to force remount
+  const { data: session } = useSession();
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);
@@ -180,6 +202,7 @@ export default function MapComponent() {
           <Marker
             key={photo.id}
             position={[photo.latitude, photo.longitude]}
+            icon={session?.user?.email === photo.user.email ? userIcon : defaultIcon}
           >
             <Popup>
               <div className="max-w-[180px] bg-gray-800 rounded-lg overflow-hidden">

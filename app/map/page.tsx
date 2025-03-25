@@ -103,8 +103,8 @@ export default function MapPage() {
           </div>
         </div>
         
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border-8 border-gray-700">
-          <div className="h-[calc(100vh-12rem)] w-full">
+        <div className="flex-1">
+          <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border-2 border-gray-700" style={{ height: 'calc(100vh - 200px)' }}>
             <Suspense fallback={<LoadingSpinner />}>
               <MapWithNoSSR />
             </Suspense>
