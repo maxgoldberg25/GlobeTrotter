@@ -103,7 +103,7 @@ export default function MapPage() {
           </div>
         </div>
         
-        <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+        <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border-8 border-gray-700">
           <div className="h-[calc(100vh-12rem)] w-full">
             <Suspense fallback={<LoadingSpinner />}>
               <MapWithNoSSR />
