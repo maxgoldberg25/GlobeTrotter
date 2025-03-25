@@ -39,6 +39,7 @@
     "react-hot-toast": "^2.5.2",
     "react-leaflet": "^4.2.1",
     "stream": "^0.0.3",
+    "tailwind-scrollbar-hide": "^2.0.0",
     "three": "^0.161.0"
   },
   "devDependencies": {

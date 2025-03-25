@@ -3,17 +3,20 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
-  webpack: (config, { isServer }) => {
-    // Add custom webpack config here if needed
+  images: {
+    domains: ['res.cloudinary.com', 'images.unsplash.com'],
+  },
+  webpack: (config) => {
+    config.externals.push({
+      'utf-8-validate': 'commonjs utf-8-validate',
+      'bufferutil': 'commonjs bufferutil',
+    });
     return config;
   },
   // Ensure proper handling of runtime
   poweredByHeader: false,
   reactStrictMode: true,
   swcMinify: true,
-  images: {
-    domains: ['res.cloudinary.com'],
-  },
 };
 
 module.exports = nextConfig; 
