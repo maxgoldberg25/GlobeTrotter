@@ -45,7 +45,7 @@ To use this feature, you must set the following environment variable:
 
 ## Live Demo
 
-🌎 **Try GlobeTrotter**: [https://globe-trotter-sable.vercel.app/](https://globe-trotter-sable.vercel.app/)
+Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.app/)
 
 Experience the live application and explore features like:
 - Interactive world map with photo locations
@@ -96,13 +96,6 @@ npm run dev
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Live Demo
-
-Visit the live application: [GlobeTrotter](https://globe-trotter-sable.vercel.app/)
 
 ## Features
 
