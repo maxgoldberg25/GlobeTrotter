@@ -34,8 +34,8 @@ export default function AdminPage() {
       if (status === 'authenticated' && session?.user?.email === 'test@gmail.com') {
         try {
           setLoading(true);
+          setError(null);
           
-          // Fetch real users from the API
           const response = await fetch('/api/admin/users');
           
           if (!response.ok) {
@@ -43,17 +43,19 @@ export default function AdminPage() {
           }
           
           const data = await response.json();
-          setUsers(data.users);
+          setUsers(Array.isArray(data) ? data : data.users || []);
           setLoading(false);
         } catch (err) {
           console.error('Error fetching users:', err);
           setError('Failed to fetch users from database');
+          setUsers([]); // Initialize with empty array on error
           setLoading(false);
         }
       } else if (status === 'unauthenticated') {
         router.push('/login?callbackUrl=/admin');
       } else if (status === 'authenticated') {
         setError('Unauthorized: Admin access only');
+        setUsers([]); // Initialize with empty array when unauthorized
         setLoading(false);
       }
     };
@@ -66,7 +68,7 @@ export default function AdminPage() {
   // Get current users for pagination
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const currentUsers = loading ? [] : users.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(users.length / usersPerPage);
 
   // Change page

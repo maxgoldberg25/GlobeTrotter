@@ -2,71 +2,58 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 
+// Middleware function to handle authentication
 export async function middleware(request: NextRequest) {
-  // Use a try-catch to prevent crashing due to missing environment variables
   try {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
+    // Get the token using next-auth
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
     });
-    
+
     const isAuthenticated = !!token;
-    const isAuthPage = 
-      request.nextUrl.pathname.startsWith('/login') || 
-      request.nextUrl.pathname.startsWith('/signup') ||
-      request.nextUrl.pathname.startsWith('/auth');
+    const path = request.nextUrl.pathname;
     
-    const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+    // Define authentication required paths
+    const authRequiredPaths = ['/dashboard', '/profile', '/upload', '/admin', '/settings'];
+    const authPages = ['/login', '/signup'];
     
-    // If the user is on a protected route without authentication, redirect to login
-    if (!isAuthenticated && 
-        !isAuthPage && 
-        !isApiRoute && 
-        (
-          request.nextUrl.pathname.startsWith('/profile') ||
-          request.nextUrl.pathname.startsWith('/upload') ||
-          request.nextUrl.pathname.startsWith('/dashboard') ||
-          request.nextUrl.pathname.startsWith('/admin')
-        )
-      ) {
-      // Store the original URL in the search parameters
+    // Check if the current path requires authentication
+    const isAuthRequired = authRequiredPaths.some(authPath => path.startsWith(authPath));
+    const isAuthPage = authPages.some(authPath => path.startsWith(authPath));
+    const isApiRoute = path.startsWith('/api');
+
+    // Redirect to login if auth is required but user is not authenticated
+    if (isAuthRequired && !isAuthenticated && !isApiRoute) {
       const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('callbackUrl', encodeURI(request.url));
+      redirectUrl.searchParams.set('callbackUrl', request.url);
       return NextResponse.redirect(redirectUrl);
     }
 
-    // If the user is authenticated and visiting auth pages, redirect to profile
+    // Redirect to dashboard if user is authenticated but trying to access auth pages
     if (isAuthenticated && isAuthPage) {
-      return NextResponse.redirect(new URL('/profile', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    // Add auth state to request headers to make it available to pages
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-is-authenticated', isAuthenticated ? 'true' : 'false');
-
-    // Return the response with updated headers
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
-    // If there's an error, continue without authentication
+    // If there's an error, allow the request to continue
     return NextResponse.next();
   }
 }
 
-// Only run middleware on matching routes
+// Configure paths that trigger the middleware
 export const config = {
   matcher: [
-    '/profile/:path*',
-    '/upload/:path*',
-    '/settings/:path*',
-    '/admin/:path*',
-    '/auth/signin',
-    '/auth/signup',
-    '/login',
-    '/signup',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 }; 
