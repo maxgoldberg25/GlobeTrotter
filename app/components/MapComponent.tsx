@@ -37,7 +37,7 @@ interface Photo {
 
 // Fix for default marker icons in Next.js
 const defaultIcon = L.icon({
-  iconUrl: '/images/marker-icon.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
   shadowUrl: '/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -46,7 +46,7 @@ const defaultIcon = L.icon({
 });
 
 const userIcon = L.icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  iconUrl: '/images/marker-icon.png',
   shadowUrl: '/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
