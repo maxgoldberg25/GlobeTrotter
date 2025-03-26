@@ -508,13 +508,6 @@ export default function UploadPhotoPage() {
       setImageFile(file);
       const url = URL.createObjectURL(file);
       setPreview(url);
-      
-      // Reset location if file changes
-      if (!shouldUseAI) {
-        setLatitude(null);
-        setLongitude(null);
-        setLocation('');
-      }
     }
   };
 
