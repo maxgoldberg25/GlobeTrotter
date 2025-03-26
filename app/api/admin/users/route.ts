@@ -3,41 +3,49 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
-    // Get the current session
     const session = await getServerSession(authOptions);
-    
-    // Check if user is authenticated and is the admin
-    if (!session?.user || session.user.email !== 'test@gmail.com') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Fetch all users from the database
+
+    // Check if user is admin (you can modify this check based on your admin criteria)
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user || user.email !== 'test@gmail.com') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get all users excluding sensitive information
     const users = await prisma.user.findMany({
       select: {
         id: true,
         name: true,
         email: true,
         image: true,
-        emailVerified: true,
         createdAt: true,
-        updatedAt: true,
-        hashedPassword: false, // Don't include sensitive data
-      },
-      orderBy: {
-        createdAt: 'desc',
+        emailVerified: true,
+        _count: {
+          select: {
+            photos: true,
+            followers: true,
+            following: true,
+          },
+        },
       },
     });
-    
+
     return NextResponse.json({ users }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error in admin users route:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch users' },
+      { error: 'Internal server error', users: [] },
       { status: 500 }
     );
   }

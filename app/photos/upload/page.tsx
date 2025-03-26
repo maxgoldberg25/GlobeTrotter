@@ -508,13 +508,6 @@ export default function UploadPhotoPage() {
       setImageFile(file);
       const url = URL.createObjectURL(file);
       setPreview(url);
-      
-      // Reset location if file changes
-      if (!shouldUseAI) {
-        setLatitude(null);
-        setLongitude(null);
-        setLocation('');
-      }
     }
   };
 
@@ -539,7 +532,7 @@ export default function UploadPhotoPage() {
   return (
     <div className="container mx-auto px-6 py-14">
       <div className="mb-6">
-        <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 flex items-center">
+        <Link href="/dashboard" className="text-blue-400 hover:text-blue-300 flex items-center transition-colors">
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
@@ -547,18 +540,18 @@ export default function UploadPhotoPage() {
         </Link>
       </div>
       
-      <h1 className="text-2xl font-bold mb-8">Upload a Photo</h1>
+      <h1 className="text-2xl font-bold mb-8 text-white">Upload a Photo</h1>
       
       {status === "loading" ? (
-        <div className="text-center py-8">Loading...</div>
+        <div className="text-center py-8 text-gray-400">Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden">
           <div className="p-8">
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <div className="mb-6">
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
                       Title*
                     </label>
                     <input
@@ -566,14 +559,14 @@ export default function UploadPhotoPage() {
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter a title for your photo"
                       required
                     />
                   </div>
                   
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Location
                     </label>
                     <input
@@ -581,12 +574,12 @@ export default function UploadPhotoPage() {
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3"
                       placeholder="Where was this photo taken?"
                     />
                     
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Select Location on Map
                       </label>
                       <MapPicker 
@@ -624,10 +617,10 @@ export default function UploadPhotoPage() {
                   </div>
                   
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Photo* <span className="text-xs text-red-600 ml-1">(JPEG format required)</span>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Photo* <span className="text-xs text-red-400 ml-1">(JPEG format required)</span>
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                    <div className="border-2 border-dashed border-gray-600 rounded-md p-6 text-center bg-gray-700">
                       <input
                         type="file"
                         accept="image/jpeg,image/jpg"
@@ -641,19 +634,19 @@ export default function UploadPhotoPage() {
                       >
                         Select Image
                       </label>
-                      <p className="text-sm text-gray-500 mt-2">or drag and drop</p>
-                      <p className="text-xs text-amber-600 mt-1">Only JPEG images are supported for AI location detection</p>
+                      <p className="text-sm text-gray-400 mt-2">or drag and drop</p>
+                      <p className="text-xs text-amber-400 mt-1">Only JPEG images are supported for AI location detection</p>
                     </div>
                     
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Or use an image URL
                       </label>
                       <input
                         type="url"
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://example.com/image.jpg"
                       />
                     </div>
@@ -662,10 +655,10 @@ export default function UploadPhotoPage() {
                 
                 <div>
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Preview
                     </label>
-                    <div className="border border-gray-300 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center" style={{ height: '300px' }}>
+                    <div className="border border-gray-600 rounded-md overflow-hidden bg-gray-700 flex items-center justify-center" style={{ height: '300px' }}>
                       {preview ? (
                         <img
                           src={preview}
@@ -682,7 +675,7 @@ export default function UploadPhotoPage() {
                           onError={() => setError("Invalid image URL")}
                         />
                       ) : (
-                        <div className="text-gray-500">
+                        <div className="text-gray-400">
                           No image selected
                         </div>
                       )}
@@ -692,9 +685,9 @@ export default function UploadPhotoPage() {
               </div>
               
               {/* Add explanatory text about automatic location detection */}
-              <div className="mt-2 text-sm text-gray-600">
+              <div className="mt-2 text-sm text-gray-400">
                 <p className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {!latitude && !longitude ? (
@@ -705,23 +698,12 @@ export default function UploadPhotoPage() {
                 </p>
               </div>
               
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
-                  {error}
-                </div>
-              )}
-              
-              {success && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
-                  Photo uploaded successfully! Redirecting...
-                </div>
-              )}
-              
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-md">
-                <p className="text-sm text-yellow-800 font-medium mb-1">
+              {/* AI Detection Section */}
+              <div className="mt-4 p-4 bg-gray-700 border border-gray-600 rounded-md">
+                <p className="text-sm text-gray-300 font-medium mb-1">
                   Don't know where this photo was taken?
                 </p>
-                <p className="text-xs text-yellow-700">
+                <p className="text-xs text-gray-400 mb-3">
                   Our experimental AI can attempt to guess the location based on landmarks and features in your photo. 
                   Results may vary in accuracy and are not guaranteed to be correct.
                 </p>
@@ -775,7 +757,7 @@ export default function UploadPhotoPage() {
                     }
                   }}
                   disabled={isDetectingLocation || (!imageFile && !imageUrl)}
-                  className="mt-3 w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-md hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-md hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {isDetectingLocation ? (
                     <>
@@ -793,10 +775,22 @@ export default function UploadPhotoPage() {
                 </button>
               </div>
               
+              {error && (
+                <div className="mb-6 p-4 bg-red-900 border border-red-700 text-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
+              
+              {success && (
+                <div className="mb-6 p-4 bg-green-900 border border-green-700 text-green-200 rounded-md">
+                  Photo uploaded successfully! Redirecting...
+                </div>
+              )}
+              
               <div className="mt-8 flex justify-end">
                 <Link
                   href="/dashboard"
-                  className="px-4 py-2 mr-4 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition"
+                  className="px-4 py-2 mr-4 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-700 transition"
                 >
                   Cancel
                 </Link>

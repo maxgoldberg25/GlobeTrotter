@@ -72,30 +72,61 @@ export default function MapPage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-14">
-      <div className="mb-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 flex items-center">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          Back to Dashboard
-        </Link>
+    <div className="min-h-screen bg-gray-900">
+      <div className="container mx-auto px-6 py-20">
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Explore Photos on the Map</h1>
+            <p className="text-gray-400">Discover amazing photos from around the world</p>
+          </div>
+          
+          <div className="flex space-x-4">
+            <Link 
+              href="/dashboard" 
+              className="inline-flex items-center px-4 py-2 text-gray-300 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Back to Dashboard
+            </Link>
+            
+            <Link 
+              href="/photos/upload" 
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Upload Photo
+            </Link>
+          </div>
+        </div>
         
-        <Link href="/photos/upload" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-          Upload Photo
-        </Link>
-      </div>
-      
-      <h1 className="text-2xl font-bold mb-8">Explore Photos on the Map</h1>
-      
-      <div className="h-screen w-full pt-16">
-        <Suspense fallback={<LoadingSpinner />}>
-          <MapWithNoSSR />
-        </Suspense>
-      </div>
-      
-      <div className="mt-6 text-gray-600 text-sm">
-        <p>Click on a marker to view photo details. Use the controls to zoom and pan around the map.</p>
+        <div className="flex-1">
+          <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden border-2 border-gray-700" style={{ height: 'calc(100vh - 200px)' }}>
+            <Suspense fallback={<LoadingSpinner />}>
+              <MapWithNoSSR />
+            </Suspense>
+          </div>
+        </div>
+        
+        <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+          <div className="text-gray-400 text-sm">
+            <p>Click on a marker to view photo details. Use the controls to zoom and pan around the map.</p>
+          </div>
+          
+          <div className="flex items-center space-x-4 text-sm text-gray-400">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+              <span>Your Photos</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <span>Other Photos</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

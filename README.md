@@ -7,6 +7,8 @@ GlobeTrotter is a social platform for travelers to share their photos and experi
 - **User Authentication**: Secure login and registration system
 - **Photo Upload**: Share your travel photos with titles, descriptions, and location data
 - **Interactive Map**: View all shared photos on a global map with location markers
+  - Blue pins: Your photos
+  - Green pins: Other users' photos
 - **Profile Management**: Customize your profile and view other users' galleries
 - **Location Tracking**: Automatically capture or manually set photo locations
 - **Social Features**: Follow other travelers and interact with their content
@@ -228,3 +230,12 @@ The application now automatically optimizes images to prevent payload size issue
 - Original image quality is preserved for viewing while optimizing for server requirements
 
 These fixes improve reliability when uploading photos with both manual map selections and AI-detected locations.
+
+### Map Features
+- Interactive world map showing all photo locations
+- Color-coded pins:
+  - Blue pins: Your photos
+  - Green pins: Other users' photos
+- Click on pins to view photo details
+- Real-time updates when new photos are added
+- Search and filter capabilities

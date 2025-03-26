@@ -1,0 +1,8 @@
+<svg width="1440" height="1024" viewBox="0 0 1440 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h1440v1024H0z" fill="url(#pattern)" />
+  <defs>
+    <pattern id="pattern" patternContentUnits="objectBoundingBox" width=".05" height=".07">
+      <circle cx=".025" cy=".035" r=".01" fill="#4B5563"/>
+    </pattern>
+  </defs>
+</svg> 

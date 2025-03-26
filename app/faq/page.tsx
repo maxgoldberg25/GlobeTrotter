@@ -60,25 +60,25 @@ export default function FAQ() {
   };
 
   return (
-    <PageContainer className="bg-gray-50">
+    <PageContainer>
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl text-gray-600">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h1>
+          <p className="text-xl text-gray-400">
             Find answers to common questions about GlobeTrotter
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+        <div className="bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
           {faqs.map((faq, index) => (
-            <div key={index} className="border-b border-gray-200 last:border-b-0">
+            <div key={index} className="border-b border-gray-700 last:border-b-0">
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors focus:outline-none"
+                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-700 transition-colors focus:outline-none"
               >
-                <span className="text-lg font-medium text-gray-900">{faq.question}</span>
+                <span className="text-lg font-medium text-white">{faq.question}</span>
                 <svg
-                  className={`w-5 h-5 text-gray-500 transform transition-transform ${
+                  className={`w-5 h-5 text-gray-400 transform transition-transform ${
                     openIndex === index ? 'rotate-180' : ''
                   }`}
                   fill="none"
@@ -93,23 +93,23 @@ export default function FAQ() {
                   openIndex === index ? 'max-h-96 py-4' : 'max-h-0'
                 }`}
               >
-                <p className="px-6 text-gray-600">{faq.answer}</p>
+                <p className="px-6 text-gray-400">{faq.answer}</p>
               </div>
             </div>
           ))}
         </div>
 
         <div className="text-center mt-8">
-          <p className="text-gray-600 mb-4">Didn't find what you were looking for?</p>
+          <p className="text-gray-400 mb-4">Didn't find what you were looking for?</p>
           <Link href="/contact">
-            <button className="bg-primary text-white hover:bg-primary-dark px-6 py-2 rounded-md text-lg font-medium transition-colors">
+            <button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md text-lg font-medium transition-colors">
               Contact Us
             </button>
           </Link>
         </div>
 
         <div className="text-center mt-12">
-          <Link href="/" className="text-primary hover:text-primary-dark font-medium">
+          <Link href="/" className="text-blue-400 hover:text-blue-300 font-medium">
             ← Back to Home
           </Link>
         </div>
