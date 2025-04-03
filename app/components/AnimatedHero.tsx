@@ -3,9 +3,13 @@
 import { motion, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function AnimatedHero() {
   const controls = useAnimation();
+  const { data: session } = useSession();
+  // If the user is signed in, redirect to /login; otherwise, redirect to /photos/upload
+  const destination = session ? '/login' : '/photos/upload';
   const features = [
     {
       title: 'AI Location Detection',
@@ -123,7 +127,7 @@ export default function AnimatedHero() {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <Link 
-              href="/auth/signup" 
+              href={destination}
               className="bg-blue-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold 
                 hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
             >

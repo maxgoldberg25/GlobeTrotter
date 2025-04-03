@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
       <div className="container mx-auto px-4 pt-32">
-        <div className="py-16">
+        <div className="py-0"> 
           <AnimatedHero />
         </div>
         <div className="mt-32">
